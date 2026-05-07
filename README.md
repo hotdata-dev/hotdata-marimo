@@ -50,5 +50,7 @@ See `examples/hotdata_basic.py` for a full notebook.
 
 ```bash
 pip install -e .
-marimo edit examples/hotdata_basic.py
+marimo edit examples/hotdata_basic.py --no-token
 ```
+
+Use **`--no-token`** for local development so the editor does not redirect to `/auth/login` (session auth is easy to hit with a global Marimo config). For a public or shared machine, omit it and use the printed URL with an access token instead.
