@@ -43,6 +43,8 @@ Use `hm.connection_status(client)` (or `mo.ui.hotdata_connection_status(client)`
 
 Keep the editor in one cell and consume `editor.result` in another. The editor caches the last successful run so downstream cells do not re-query the API on every refresh; click **Run on Hotdata** again after you change SQL. While a query is running, a Marimo status spinner is shown.
 
+Marimo forbids reading the `.value` of a UI control in the **same** cell that created it. For `SqlEditor` / `TableBrowser`, **construct** the object in one cell (`editor = hm.sql_editor(...)`) and render **`.ui`** in a **later** cell (`editor.ui` or `mo.vstack([browser.ui, editor.ui])`).
+
 See `examples/hotdata_basic.py` for a full notebook.
 
 ## Development

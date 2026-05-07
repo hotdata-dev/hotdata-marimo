@@ -9,7 +9,11 @@ from hotdata_marimo.connection_picker import connection_picker
 
 
 class TableBrowser:
-    """Pick a fully qualified `connection.schema.table` and inspect columns."""
+    """Pick a fully qualified `connection.schema.table` and inspect columns.
+
+    Marimo does not allow reading ``.value`` on UI elements in the same cell that
+    constructs them. Build ``TableBrowser`` in one cell and use ``.ui`` in another.
+    """
 
     def __init__(
         self,

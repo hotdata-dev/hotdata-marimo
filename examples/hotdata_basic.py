@@ -53,8 +53,13 @@ def _(client, hm, mo):
         client,
         default_sql="SELECT * FROM tpch.tpch_sf1.nation LIMIT 5",
     )
+    return browser, editor
+
+
+@app.cell
+def _(browser, editor, mo):
     mo.vstack([browser.ui, editor.ui], gap=2)
-    return (editor,)
+    return
 
 
 @app.cell

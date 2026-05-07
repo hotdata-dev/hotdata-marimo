@@ -7,7 +7,12 @@ from hotdata_marimo.result import QueryResult
 
 
 class SqlEditor:
-    """SQL workspace: textarea plus Run, with `result` after the button is pressed."""
+    """SQL workspace: textarea plus Run, with `result` after the button is pressed.
+
+    Marimo does not allow reading ``.value`` on UI elements in the same cell that
+    constructs them. Instantiate ``SqlEditor`` in one cell and use ``.ui`` / read
+    ``.result`` in other cells (see the package README two-cell pattern).
+    """
 
     def __init__(
         self,
