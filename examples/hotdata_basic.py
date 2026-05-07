@@ -59,15 +59,13 @@ def _(client, hm, mo):
 
 
 @app.cell
-def _(browser, editor, hm, mo):
-    return mo.vstack(
-        [
-            browser.ui,
-            editor.ui,
-            mo.lazy(lambda: hm.query_result(editor.result)),
-        ],
-        gap=2,
-    )
+def _(browser, editor, mo):
+    return mo.vstack([browser.ui, editor.ui], gap=2)
+
+
+@app.cell
+def _(editor, hm):
+    return hm.query_result(editor.result)
 
 
 if __name__ == "__main__":

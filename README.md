@@ -44,7 +44,7 @@ Keep the editor in one cell and consume `editor.result` in another. The editor c
 
 Marimo only shows **what you `return` from a cell**. Calling `mo.vstack(...)` or `hm.query_result(...)` without returning it produces no visible output.
 
-See `examples/hotdata_basic.py` for a full notebook (four cells: build `browser`/`editor`, then one cell returns `mo.vstack` of `browser.ui`, `editor.ui`, and `mo.lazy(lambda: hm.query_result(editor.result))` so the result is not evaluated before the controls exist). If Marimo ever shows **empty cells** after the notebook looks wrong on disk, quit Marimo and remove `examples/__marimo__/` so the UI reloads from the `.py` file only.
+See `examples/hotdata_basic.py` for a full notebook: five Python cells (`mo.vstack` for **controls only**, then a separate cell `return hm.query_result(editor.result)` so results show immediately — **avoid** `mo.lazy` here: it only renders after the block scrolls into view, which looks like an empty cell). If Marimo shows **empty cells**, quit and remove `examples/__marimo__/` so the UI reloads from the `.py` file only.
 
 ## Development
 
