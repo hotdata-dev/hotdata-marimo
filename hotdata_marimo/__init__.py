@@ -1,6 +1,7 @@
 """Marimo-native UI and helpers for Hotdata."""
 
 from hotdata_marimo.client import HotdataClient, from_env
+from hotdata_marimo.connection_picker import connection_picker
 from hotdata_marimo.query_result import query_result
 from hotdata_marimo.result import QueryResult
 from hotdata_marimo.sql_editor import SqlEditor, sql_editor
@@ -12,8 +13,10 @@ __all__ = [
     "QueryResult",
     "SqlEditor",
     "TableBrowser",
+    "connection_picker",
     "connection_status",
     "from_env",
+    "hotdata_connection_picker",
     "hotdata_query_result",
     "hotdata_sql_editor",
     "hotdata_table_browser",
@@ -26,6 +29,7 @@ __all__ = [
 hotdata_sql_editor = sql_editor
 hotdata_table_browser = table_browser
 hotdata_query_result = query_result
+hotdata_connection_picker = connection_picker
 
 
 def register_mo_ui_hotdata_aliases() -> None:
@@ -36,6 +40,7 @@ def register_mo_ui_hotdata_aliases() -> None:
     mo.ui.hotdata_table_browser = hotdata_table_browser  # type: ignore[attr-defined]
     mo.ui.hotdata_query_result = hotdata_query_result  # type: ignore[attr-defined]
     mo.ui.hotdata_connection_status = connection_status  # type: ignore[attr-defined]
+    mo.ui.hotdata_connection_picker = hotdata_connection_picker  # type: ignore[attr-defined]
 
 
 register_mo_ui_hotdata_aliases()
