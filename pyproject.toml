@@ -13,7 +13,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 dependencies = [
-  "hotdata-core-notebook @ git+https://github.com/hotdata-dev/hotdata-notebook-core.git",
+  "hotdata-core-notebook @ git+https://github.com/hotdata-dev/hotdata-notebook-core.git@feat/workspace-health",
   "marimo>=0.10.0",
 ]
 
