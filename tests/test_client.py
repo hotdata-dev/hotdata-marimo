@@ -29,8 +29,15 @@ def test_pick_workspace_prefers_env(monkeypatch: pytest.MonkeyPatch):
     assert _pick_workspace("k", "https://api.hotdata.dev", None) == "ws_explicit"
 
 
+def test_pick_workspace_prefers_workspace_id_env(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.delenv("HOTDATA_WORKSPACE", raising=False)
+    monkeypatch.setenv("HOTDATA_WORKSPACE_ID", "ws_from_id")
+    assert _pick_workspace("k", "https://api.hotdata.dev", None) == "ws_from_id"
+
+
 def test_pick_workspace_chooses_first_active(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.delenv("HOTDATA_WORKSPACE", raising=False)
+    monkeypatch.delenv("HOTDATA_WORKSPACE_ID", raising=False)
 
     items = [
         SimpleNamespace(public_id="ws_1", active=False),
@@ -46,6 +53,7 @@ def test_pick_workspace_chooses_first_active(monkeypatch: pytest.MonkeyPatch):
 
 def test_pick_workspace_falls_back_to_first(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.delenv("HOTDATA_WORKSPACE", raising=False)
+    monkeypatch.delenv("HOTDATA_WORKSPACE_ID", raising=False)
 
     items = [
         SimpleNamespace(public_id="ws_1", active=False),

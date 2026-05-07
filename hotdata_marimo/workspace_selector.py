@@ -1,12 +1,16 @@
 from __future__ import annotations
 
-import os
-
 import marimo as mo
 from hotdata import ApiClient, Configuration
 from hotdata.api.workspaces_api import WorkspacesApi
 
-from hotdata_marimo.client import HotdataClient, _default_host, _default_session_id
+from hotdata_marimo.client import (
+    HotdataClient,
+    _default_api_key,
+    _default_host,
+    _default_session_id,
+    _explicit_workspace_id,
+)
 
 
 def _list_workspaces(api_key: str, host: str, session_id: str | None):
@@ -35,7 +39,7 @@ class WorkspaceSelector:
         self._api_key = api_key
         self._host = host or _default_host()
         self._session_id = session_id
-        self._explicit = os.environ.get("HOTDATA_WORKSPACE")
+        self._explicit = _explicit_workspace_id()
 
         workspaces = _list_workspaces(api_key, self._host, session_id)
         if not workspaces:
@@ -92,9 +96,9 @@ class WorkspaceSelector:
 
 
 def workspace_selector_from_env(*, label: str = "Workspace") -> WorkspaceSelector:
-    api_key = os.environ.get("HOTDATA_API_KEY", "")
+    api_key = _default_api_key()
     if not api_key:
-        raise RuntimeError("HOTDATA_API_KEY is not set.")
+        raise RuntimeError("HOTDATA_API_KEY or HOTDATA_TOKEN must be set.")
     host = _default_host()
     session = _default_session_id()
     return WorkspaceSelector(

@@ -34,8 +34,15 @@ def _normalize_host(url: str) -> str:
 
 
 def _default_api_key() -> str:
-    key = os.environ.get("HOTDATA_API_KEY", "")
-    return key
+    return os.environ.get("HOTDATA_API_KEY", "") or os.environ.get(
+        "HOTDATA_TOKEN", ""
+    )
+
+
+def _explicit_workspace_id() -> str | None:
+    return os.environ.get("HOTDATA_WORKSPACE") or os.environ.get(
+        "HOTDATA_WORKSPACE_ID"
+    )
 
 
 def _default_host() -> str:
@@ -48,7 +55,7 @@ def _default_session_id() -> str | None:
 
 
 def _pick_workspace(api_key: str, host: str, session_id: str | None) -> str:
-    explicit = os.environ.get("HOTDATA_WORKSPACE")
+    explicit = _explicit_workspace_id()
     if explicit:
         return explicit
     cfg = Configuration(
@@ -94,7 +101,9 @@ class HotdataClient:
     def from_env(cls) -> HotdataClient:
         api_key = _default_api_key()
         if not api_key:
-            raise RuntimeError("HOTDATA_API_KEY is not set.")
+            raise RuntimeError(
+                "HOTDATA_API_KEY or HOTDATA_TOKEN must be set."
+            )
         host = _default_host()
         session = _default_session_id()
         workspace_id = _pick_workspace(api_key, host, session)
