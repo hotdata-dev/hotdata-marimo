@@ -169,9 +169,11 @@ class HotdataClient:
     def qualified_table_name(self, t: TableInfo) -> str:
         return f"{t.connection}.{t.var_schema}.{t.table}"
 
-    def list_qualified_table_names(self, *, limit: int = 5000) -> list[str]:
+    def list_qualified_table_names(
+        self, *, limit: int = 5000, connection_id: str | None = None
+    ) -> list[str]:
         out: list[str] = []
-        for t in self.iter_tables():
+        for t in self.iter_tables(connection_id=connection_id):
             out.append(self.qualified_table_name(t))
             if len(out) >= limit:
                 break

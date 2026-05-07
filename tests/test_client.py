@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 import pytest
 
-from hotdata_marimo.client import _normalize_host, _pick_workspace
+from hotdata_marimo.client import HotdataClient, _normalize_host, _pick_workspace
 
 
 @pytest.mark.parametrize(
@@ -56,4 +56,12 @@ def test_pick_workspace_falls_back_to_first(monkeypatch: pytest.MonkeyPatch):
     with patch("hotdata_marimo.client.WorkspacesApi") as Api:
         Api.return_value.list_workspaces.return_value = listing
         assert _pick_workspace("k", "https://api.hotdata.dev", None) == "ws_1"
+
+
+def test_list_qualified_table_names_passes_connection_id():
+    client = HotdataClient("k", "ws", host="https://api.hotdata.dev")
+    with patch.object(client, "iter_tables", return_value=iter([])) as it:
+        client.list_qualified_table_names(limit=5, connection_id="conn_a")
+    it.assert_called_once()
+    assert it.call_args.kwargs["connection_id"] == "conn_a"
 
