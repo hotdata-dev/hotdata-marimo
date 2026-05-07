@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.23.5"
-# Run locally without a login page: marimo edit examples/hotdata_basic.py --no-token
+# Local dev (no /auth/login): marimo edit examples/hotdata_basic.py --no-token
 app = marimo.App()
 
 
@@ -54,17 +54,17 @@ def _(client, hm, mo):
         client,
         default_sql="SELECT * FROM tpch.tpch_sf1.nation LIMIT 5",
     )
-    return
+    return browser, editor
 
 
 @app.cell
-def _():
-    return
+def _(browser, editor, mo):
+    return mo.vstack([browser.ui, editor.ui], gap=2)
 
 
 @app.cell
-def _():
-    return
+def _(editor, hm):
+    return hm.query_result(editor.result)
 
 
 if __name__ == "__main__":
