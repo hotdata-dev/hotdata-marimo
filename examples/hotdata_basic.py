@@ -1,7 +1,8 @@
 import marimo
 
 __generated_with = "0.23.5"
-# Local dev (no /auth/login): marimo edit examples/hotdata_basic.py --no-token
+# Run: marimo edit examples/hotdata_basic.py --no-token -p 2721
+# This notebook is Python-only — do not add SQL cells; use the Hotdata editor UI for SQL.
 app = marimo.App()
 
 
