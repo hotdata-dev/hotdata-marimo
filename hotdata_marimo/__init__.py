@@ -3,6 +3,7 @@
 from hotdata_marimo.client import HotdataClient, from_env
 from hotdata_marimo.connection_picker import connection_picker
 from hotdata_marimo.query_result import query_result
+from hotdata_marimo.recent_results import RecentResults, recent_results
 from hotdata_marimo.result import QueryResult
 from hotdata_marimo.sql_editor import SqlEditor, sql_editor
 from hotdata_marimo.status import connection_status
@@ -12,6 +13,7 @@ from hotdata_marimo.workspace_selector import WorkspaceSelector, workspace_selec
 __all__ = [
     "HotdataClient",
     "QueryResult",
+    "RecentResults",
     "SqlEditor",
     "TableBrowser",
     "connection_picker",
@@ -19,9 +21,11 @@ __all__ = [
     "from_env",
     "hotdata_connection_picker",
     "hotdata_query_result",
+    "hotdata_recent_results",
     "hotdata_sql_editor",
     "hotdata_table_browser",
     "hotdata_workspace_selector",
+    "recent_results",
     "query_result",
     "sql_editor",
     "table_browser",
@@ -35,6 +39,7 @@ hotdata_table_browser = table_browser
 hotdata_query_result = query_result
 hotdata_connection_picker = connection_picker
 hotdata_workspace_selector = workspace_selector_from_env
+hotdata_recent_results = recent_results
 
 
 def register_mo_ui_hotdata_aliases() -> None:
@@ -47,6 +52,7 @@ def register_mo_ui_hotdata_aliases() -> None:
     mo.ui.hotdata_connection_status = connection_status  # type: ignore[attr-defined]
     mo.ui.hotdata_connection_picker = hotdata_connection_picker  # type: ignore[attr-defined]
     mo.ui.hotdata_workspace_selector = hotdata_workspace_selector  # type: ignore[attr-defined]
+    mo.ui.hotdata_recent_results = hotdata_recent_results  # type: ignore[attr-defined]
 
 
 register_mo_ui_hotdata_aliases()
