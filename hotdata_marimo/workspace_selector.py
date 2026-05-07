@@ -1,28 +1,14 @@
 from __future__ import annotations
 
 import marimo as mo
-from hotdata import ApiClient, Configuration
-from hotdata.api.workspaces_api import WorkspacesApi
-
-from hotdata_marimo.client import (
-    HotdataClient,
-    _default_api_key,
-    _default_host,
-    _default_session_id,
-    _explicit_workspace_id,
+from hotdata_core_notebook.client import HotdataClient
+from hotdata_core_notebook.env import (
+    default_api_key,
+    default_host,
+    default_session_id,
+    explicit_workspace_id,
+    list_workspaces,
 )
-
-
-def _list_workspaces(api_key: str, host: str, session_id: str | None):
-    cfg = Configuration(
-        host=host,
-        api_key=api_key,
-        workspace_id=None,
-        session_id=session_id,
-    )
-    with ApiClient(cfg) as api:
-        listing = WorkspacesApi(api).list_workspaces()
-    return listing.workspaces
 
 
 class WorkspaceSelector:
@@ -37,11 +23,11 @@ class WorkspaceSelector:
         label: str = "Workspace",
     ) -> None:
         self._api_key = api_key
-        self._host = host or _default_host()
+        self._host = host or default_host()
         self._session_id = session_id
-        self._explicit = _explicit_workspace_id()
+        self._explicit = explicit_workspace_id()
 
-        workspaces = _list_workspaces(api_key, self._host, session_id)
+        workspaces = list_workspaces(api_key, self._host, session_id)
         if not workspaces:
             raise RuntimeError("No Hotdata workspaces found for this API key.")
 
@@ -96,15 +82,14 @@ class WorkspaceSelector:
 
 
 def workspace_selector_from_env(*, label: str = "Workspace") -> WorkspaceSelector:
-    api_key = _default_api_key()
+    api_key = default_api_key()
     if not api_key:
         raise RuntimeError("HOTDATA_API_KEY or HOTDATA_TOKEN must be set.")
-    host = _default_host()
-    session = _default_session_id()
+    host = default_host()
+    session = default_session_id()
     return WorkspaceSelector(
         api_key=api_key,
         host=host,
         session_id=session,
         label=label,
     )
-

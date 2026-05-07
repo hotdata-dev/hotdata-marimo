@@ -1,13 +1,16 @@
-"""Marimo-native UI and helpers for Hotdata."""
+"""Marimo-native UI and helpers for Hotdata (built on hotdata-core-notebook)."""
 
-from hotdata_marimo.client import HotdataClient, from_env
-from hotdata_marimo.connection_picker import connection_picker
-from hotdata_marimo.query_result import query_result
-from hotdata_marimo.recent_results import RecentResults, recent_results
-from hotdata_marimo.result import QueryResult
+from hotdata_core_notebook import HotdataClient, QueryResult, from_env
+
+from hotdata_marimo.display import (
+    RecentResults,
+    connection_status,
+    query_result,
+    recent_results,
+    run_history,
+)
 from hotdata_marimo.sql_editor import SqlEditor, sql_editor
-from hotdata_marimo.status import connection_status
-from hotdata_marimo.table_browser import TableBrowser, table_browser
+from hotdata_marimo.table_browser import TableBrowser, connection_picker, table_browser
 from hotdata_marimo.workspace_selector import WorkspaceSelector, workspace_selector_from_env
 
 __all__ = [
@@ -16,6 +19,7 @@ __all__ = [
     "RecentResults",
     "SqlEditor",
     "TableBrowser",
+    "WorkspaceSelector",
     "connection_picker",
     "connection_status",
     "from_env",
@@ -25,11 +29,11 @@ __all__ = [
     "hotdata_sql_editor",
     "hotdata_table_browser",
     "hotdata_workspace_selector",
-    "recent_results",
     "query_result",
+    "recent_results",
+    "run_history",
     "sql_editor",
     "table_browser",
-    "WorkspaceSelector",
     "workspace_selector_from_env",
     "register_mo_ui_hotdata_aliases",
 ]

@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import marimo as mo
 
-from hotdata_marimo.client import HotdataClient
-from hotdata_marimo.result import QueryResult
+from hotdata_core_notebook.client import HotdataClient
+from hotdata_core_notebook.result import QueryResult
 
 
 class SqlEditor:
@@ -70,7 +70,7 @@ class SqlEditor:
                         {
                             "Run history": mo.lazy(
                                 lambda: __import__(
-                                    "hotdata_marimo.run_history",
+                                    "hotdata_marimo.display",
                                     fromlist=["run_history"],
                                 ).run_history(self._client)
                             )
