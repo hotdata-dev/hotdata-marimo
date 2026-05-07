@@ -40,12 +40,14 @@ class SqlEditor:
         self._cached_sql: str | None = None
         self._last_rerun_n: int | None = None
         self._last_clear_n: int | None = None
+        self.show_history = mo.ui.checkbox(value=False, label="Show run history")
 
     @property
     def ui(self):
         _ = self.run.value
         _ = self.rerun.value
         _ = self.clear.value
+        _ = self.show_history.value
         return mo.vstack(
             [
                 self.sql,
@@ -54,8 +56,23 @@ class SqlEditor:
                         self.run,
                         self.rerun,
                         self.clear,
+                        self.show_history,
                     ],
                     gap=1,
+                ),
+                (
+                    mo.accordion(
+                        {
+                            "Run history": mo.lazy(
+                                lambda: __import__(
+                                    "hotdata_marimo.run_history",
+                                    fromlist=["run_history"],
+                                ).run_history(self._client)
+                            )
+                        }
+                    )
+                    if self.show_history.value
+                    else mo.md("")
                 ),
             ],
             gap=1,

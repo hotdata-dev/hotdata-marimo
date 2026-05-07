@@ -140,6 +140,12 @@ class HotdataClient:
     def _results_api(self) -> ResultsApi:
         return ResultsApi(self._api)
 
+    def query_runs(self) -> QueryRunsApi:
+        return self._query_runs_api()
+
+    def results(self) -> ResultsApi:
+        return self._results_api()
+
     def iter_tables(
         self,
         *,
