@@ -13,6 +13,10 @@ class TableBrowser:
 
     Marimo does not allow reading ``.value`` on UI elements in the same cell that
     constructs them. Build ``TableBrowser`` in one cell and use ``.ui`` in another.
+
+    The table dropdown is not recreated on every render (that would make it
+    "born" in the layout cell). It is only rebuilt when the active connection
+    changes: after a rebuild, ``.value`` is not read until a later run.
     """
 
     def __init__(
@@ -38,8 +42,35 @@ class TableBrowser:
             else:
                 self._implicit_connection_id = ""
 
-        self.search = mo.ui.text(value="", label="Search", full_width=True)
-        self._bootstrap_table_pick()
+        self._table_pick_ctx: str | None = None
+
+        if self._conn_pick is not None:
+            self.table_pick = mo.ui.dropdown(
+                options={"(select connection above)": ""},
+                label="Table",
+                full_width=True,
+            )
+            self._empty_catalog = True
+            self._all_names: list[str] = []
+        else:
+            names = self._names_for_active_connection()
+            self._all_names = names
+            if not names:
+                self.table_pick = mo.ui.dropdown(
+                    options={"(no tables in catalog)": ""},
+                    label="Table",
+                    full_width=True,
+                )
+                self._empty_catalog = True
+            else:
+                self._empty_catalog = False
+                self.table_pick = mo.ui.dropdown(
+                    options={n: n for n in names},
+                    label="Table",
+                    full_width=True,
+                    searchable=True,
+                )
+            self._table_pick_ctx = self._active_connection_id()
 
     def _active_connection_id(self) -> str | None:
         if self._override_connection_id is not None:
@@ -60,22 +91,25 @@ class TableBrowser:
             connection_id=cid,
         )
 
-    def _bootstrap_table_pick(self) -> None:
-        names = self._names_for_active_connection()
+    def _rebuild_table_pick(self, names: list[str]) -> None:
         self._all_names = names
         if not names:
+            self._empty_catalog = True
             self.table_pick = mo.ui.dropdown(
                 options={"(no tables in catalog)": ""},
                 label="Table",
+                full_width=True,
             )
-            self._empty_catalog = True
         else:
             self._empty_catalog = False
             self.table_pick = mo.ui.dropdown(
                 options={n: n for n in names},
                 label="Table",
                 full_width=True,
+                searchable=True,
             )
+        self._table_pick_ctx = self._active_connection_id()
+        self._rebuilt_table_pick_this_run = True
 
     @property
     def selected_connection_id(self) -> str | None:
@@ -88,35 +122,21 @@ class TableBrowser:
 
     @property
     def ui(self):
-        _ = self.search.value
+        self._rebuilt_table_pick_this_run = False
+
         if self._conn_pick is not None:
             _ = self._conn_pick.value
 
-        self._all_names = self._names_for_active_connection()
-        needle = self.search.value.strip().lower()
-        if self._all_names:
-            self._empty_catalog = False
-            options = (
-                [n for n in self._all_names if needle in n.lower()]
-                if needle
-                else self._all_names
-            )
-            if not options:
-                options = self._all_names
-            self.table_pick = mo.ui.dropdown(
-                options={n: n for n in options},
-                label="Table",
-                full_width=True,
-            )
-        else:
-            self._empty_catalog = True
-            self.table_pick = mo.ui.dropdown(
-                options={"(no tables in catalog)": ""},
-                label="Table",
-            )
+        cid = self._active_connection_id()
+        names = self._names_for_active_connection()
 
-        _ = self.table_pick.value
-        sel = self.selected_table
+        if cid and cid != self._table_pick_ctx:
+            self._rebuild_table_pick(names)
+
+        if not self._rebuilt_table_pick_this_run:
+            _ = self.table_pick.value
+
+        sel = None if self._rebuilt_table_pick_this_run else self.selected_table
         conn_header = (
             mo.md(f"**Connection** `{self._active_connection_id()}`")
             if self._active_connection_id()
@@ -127,7 +147,7 @@ class TableBrowser:
                 "_No tables returned from the information schema. "
                 "Try refreshing a connection in Hotdata._"
                 if self._empty_catalog
-                else "Choose a table below."
+                else "Choose a table below (search inside the dropdown when needed)."
             )
             stack = [
                 mo.md(
@@ -138,7 +158,7 @@ class TableBrowser:
                 stack.append(conn_header)
             if self._conn_pick is not None:
                 stack.append(self._conn_pick)
-            stack.extend([self.search, self.table_pick])
+            stack.append(self.table_pick)
             return mo.vstack(stack, gap=1)
 
         cols = self._client.columns_for_qualified(sel)
@@ -168,7 +188,6 @@ class TableBrowser:
             stack2.append(self._conn_pick)
         stack2.extend(
             [
-                self.search,
                 self.table_pick,
                 mo.md("### Columns"),
                 body,
