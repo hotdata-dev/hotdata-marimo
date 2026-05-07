@@ -4,23 +4,15 @@ __generated_with = "0.23.5"
 app = marimo.App()
 
 
-app._unparsable_cell(
-    r"""
+@app.cell
+def _():
     import os
 
     import marimo as mo
 
-    import hotdata[marimo] as hd
-    import hotdata[hex] as hd
-    import hotdata[ibis] as hd
-    """,
-    name="_"
-)
+    import hotdata_marimo as hm
 
-
-@app.cell
-def _():
-    return
+    return hm, mo, os
 
 
 @app.cell
@@ -39,11 +31,6 @@ def _(hm, mo, os):
 
 
 @app.cell
-def _():
-    return
-
-
-@app.cell
 def _(client, hm, mo):
     browser = hm.table_browser(client)
     editor = hm.sql_editor(client, default_sql="SELECT 1 AS ok")
@@ -52,18 +39,9 @@ def _(client, hm, mo):
 
 
 @app.cell
-def _():
-    return
-
-
-@app.cell
-def _(editor):
+def _(editor, hm):
     result = editor.result
-    return
-
-
-@app.cell
-def _():
+    hm.query_result(result)
     return
 
 
