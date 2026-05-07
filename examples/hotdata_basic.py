@@ -18,10 +18,14 @@ def _():
 @app.cell
 def _(hm, mo, os):
     mo.stop(
-        not os.environ.get("HOTDATA_API_KEY"),
+        not (
+            os.environ.get("HOTDATA_API_KEY")
+            or os.environ.get("HOTDATA_TOKEN")
+        ),
         mo.callout(
             mo.md(
-                "Add **HOTDATA_API_KEY** to your environment to run this example."
+                "Add **HOTDATA_API_KEY** (or **HOTDATA_TOKEN**) to your environment "
+                "to run this example."
             ),
             kind="warn",
         ),
@@ -32,8 +36,23 @@ def _(hm, mo, os):
 
 @app.cell
 def _(client, hm, mo):
-    browser = hm.table_browser(client)
-    editor = hm.sql_editor(client, default_sql="SELECT 1 AS ok")
+    id_map = client.connection_id_by_name()
+    tpch_id = id_map.get("tpch")
+    mo.stop(
+        not tpch_id,
+        mo.callout(
+            mo.md(
+                "This example expects a connection named **tpch**. "
+                "Create it in Hotdata or adjust the name in the notebook."
+            ),
+            kind="warn",
+        ),
+    )
+    browser = hm.table_browser(client, connection_id=tpch_id)
+    editor = hm.sql_editor(
+        client,
+        default_sql="SELECT * FROM tpch.tpch_sf1.nation LIMIT 5",
+    )
     mo.vstack([browser.ui, editor.ui], gap=2)
     return (editor,)
 
