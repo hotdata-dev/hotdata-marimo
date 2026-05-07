@@ -58,15 +58,13 @@ def _(client, hm, mo):
 
 @app.cell
 def _(browser, editor, mo):
-    mo.vstack([browser.ui, editor.ui], gap=2)
-    return
+    return mo.vstack([browser.ui, editor.ui], gap=2)
 
 
 @app.cell
 def _(editor, hm):
     result = editor.result
-    hm.query_result(result)
-    return
+    return hm.query_result(result)
 
 
 if __name__ == "__main__":
