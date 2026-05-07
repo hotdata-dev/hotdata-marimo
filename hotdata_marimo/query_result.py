@@ -12,6 +12,17 @@ def query_result(
     page_size: int = 25,
     max_height: int = 480,
 ):
+    shown_rows = len(result.rows)
+    if result.row_count > shown_rows and shown_rows > 0:
+        trunc = mo.callout(
+            mo.md(
+                f"Showing **{shown_rows}** of **{result.row_count}** rows. "
+                "Consider adding a `LIMIT` clause for faster iteration."
+            ),
+            kind="warn",
+        )
+    else:
+        trunc = None
     meta_bits = []
     if result.result_id:
         meta_bits.append(f"**result_id** `{result.result_id}`")
@@ -34,4 +45,8 @@ def query_result(
         max_height=max_height,
     )
     summary = mo.md(f"**{result.row_count}** rows · **{len(result.columns)}** columns")
-    return mo.vstack([summary, header, tbl], gap=1)
+    bits = [summary]
+    if trunc is not None:
+        bits.append(trunc)
+    bits.extend([header, tbl])
+    return mo.vstack(bits, gap=1)
