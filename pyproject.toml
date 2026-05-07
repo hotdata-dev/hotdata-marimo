@@ -23,3 +23,7 @@ dev = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
+[tool.marimo.runtime]
+# Reduces stale cell state when opening the example; overrides personal marimo.toml if unset.
+auto_instantiate = true
+
