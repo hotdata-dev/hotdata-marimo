@@ -92,7 +92,11 @@ class SqlEditor:
 
         mo.stop(
             self.run.value == 0 and self.rerun.value == 0,
-            mo.md("Click **Run on Hotdata** to execute the query."),
+            mo.md(
+                "**Run on Hotdata** is on the SQL editor UI (a cell that **returns** "
+                "`editor.ui` or `mo.vstack([browser.ui, editor.ui])`). Click it there, "
+                "then this cell will run."
+            ),
         )
         sql_text = self.sql.value
 

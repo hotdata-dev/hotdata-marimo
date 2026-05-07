@@ -63,8 +63,7 @@ def _(browser, editor, mo):
 
 @app.cell
 def _(editor, hm):
-    result = editor.result
-    return hm.query_result(result)
+    return hm.query_result(editor.result)
 
 
 if __name__ == "__main__":
