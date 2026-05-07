@@ -17,3 +17,6 @@ dist/
 build/
 *.egg-info/
 
+# Marimo editor session (local UI state; keep notebook source as examples/*.py only)
+**/__marimo__/session/
+
