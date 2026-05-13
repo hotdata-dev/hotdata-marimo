@@ -8,19 +8,30 @@ allow-direct-references = true
 [project]
 name = "hotdata-marimo"
 version = "0.1.0"
-description = "Marimo UI for Hotdata (built on hotdata-core-notebook)"
+description = "Marimo integration for Hotdata runtime"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 dependencies = [
-  "hotdata-core-notebook @ git+https://github.com/hotdata-dev/hotdata-notebook-core.git@feat/workspace-health",
+  "hotdata-runtime @ git+https://github.com/hotdata-dev/hotdata-runtime.git",
   "marimo>=0.10.0",
 ]
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
   "pytest>=8.0",
 ]
+
+[tool.uv]
+default-groups = ["dev"]
+
+# Resolve hotdata-runtime from a sibling checkout (../hotdata-runtime). Remove this
+# block and re-run `uv lock` before committing a lockfile meant for CI that only clones this repo.
+[tool.uv.sources]
+hotdata-runtime = { path = "../hotdata-runtime", editable = true }
+
+[tool.hatch.build.targets.wheel]
+packages = ["hotdata_marimo"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

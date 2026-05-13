@@ -1,6 +1,13 @@
-"""Marimo-native UI and helpers for Hotdata (built on hotdata-core-notebook)."""
+"""Marimo-native UI and helpers for Hotdata (built on hotdata-runtime)."""
 
-from hotdata_core_notebook import HotdataClient, QueryResult, from_env
+from importlib.metadata import PackageNotFoundError, version
+
+try:
+    __version__ = version("hotdata-marimo")
+except PackageNotFoundError:
+    __version__ = "0.0.0+unknown"
+
+from hotdata_runtime import HotdataClient, QueryResult, from_env
 
 from hotdata_marimo.display import (
     RecentResults,
@@ -14,6 +21,7 @@ from hotdata_marimo.table_browser import TableBrowser, connection_picker, table_
 from hotdata_marimo.workspace_selector import WorkspaceSelector, workspace_selector_from_env
 
 __all__ = [
+    "__version__",
     "HotdataClient",
     "QueryResult",
     "RecentResults",

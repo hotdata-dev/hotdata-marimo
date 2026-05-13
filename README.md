@@ -5,10 +5,11 @@ Marimo UI helpers for [Hotdata](https://hotdata.dev): run SQL from a notebook, b
 ## Install
 
 ```bash
-pip install hotdata-marimo
+uv pip install hotdata-marimo
+# or: pip install hotdata-marimo
 ```
 
-Requires Python 3.10+, **Marimo**, and [**hotdata-core-notebook**](https://github.com/hotdata-dev/hotdata-notebook-core) (Hotdata SDK + shared client — pulled in automatically when you `pip install hotdata-marimo`).
+Requires Python 3.10+, **Marimo**, and [**hotdata-runtime**](https://github.com/hotdata-dev/hotdata-runtime) (Hotdata SDK + runtime/session semantics — pulled in automatically when you `pip install hotdata-marimo`).
 
 ## Environment
 
@@ -48,31 +49,22 @@ See `examples/hotdata_basic.py` for a full notebook: five Python cells (`mo.vsta
 
 ## Layout
 
-This repo is intentionally thin: **API client, env helpers, and result models** live in **hotdata-core-notebook**; **hotdata-marimo** only adds Marimo widgets (`sql_editor`, `table_browser`, `display` for tables/status/history, `workspace_selector`). Import `HotdataClient` / `QueryResult` / `from_env` from **`hotdata_marimo`** or directly from **`hotdata_core_notebook`**.
+This repo is intentionally thin: **API client, env helpers, and result models** live in **hotdata-runtime**; **hotdata-marimo** only adds Marimo widgets (`sql_editor`, `table_browser`, `display` for tables/status/history, `workspace_selector`). Import `HotdataClient` / `QueryResult` / `from_env` from **`hotdata_marimo`** or directly from **`hotdata_runtime`**.
 
 ## Development
 
-This package depends on [**hotdata-notebook-core**](https://github.com/hotdata-dev/hotdata-notebook-core) (PyPI name `hotdata-core-notebook`). Install pulls it straight from GitHub until it is published:
+This package depends on [**hotdata-runtime**](https://github.com/hotdata-dev/hotdata-runtime) (PyPI name `hotdata-runtime`). Development uses **uv**; keep a sibling checkout at `../hotdata-runtime` so the lockfile resolves the runtime from disk (see `[tool.uv.sources]` in `pyproject.toml`).
 
 ```bash
-pip install -e .
+uv sync --locked
+uv run pytest
 marimo edit examples/hotdata_basic.py --no-token
 ```
 
-To pin a branch or commit, override the dependency when installing, for example:
+To pin **hotdata-runtime** from Git instead of the sibling path, remove the `[tool.uv.sources]` block, set the dependency line as needed, and run `uv lock` again.
 
-```bash
-pip install "hotdata-core-notebook @ git+https://github.com/hotdata-dev/hotdata-notebook-core.git@main"
-pip install -e .
-```
+For a **publishable** `uv.lock` (CI that only clones this repo), remove `[tool.uv.sources]`, point `hotdata-runtime` at PyPI or `git+https://…`, then `uv lock`.
 
-If the repo is **private**, use SSH (with keys configured) or HTTPS with a credential helper:
-
-```bash
-pip install "hotdata-core-notebook @ git+ssh://git@github.com/hotdata-dev/hotdata-notebook-core.git"
-pip install -e .
-```
-
-The **`[project] name`** in [hotdata-notebook-core](https://github.com/hotdata-dev/hotdata-notebook-core) `pyproject.toml` must stay **`hotdata-core-notebook`** so it matches this dependency line and the import package **`hotdata_core_notebook`**.
+The **`[project] name`** in [hotdata-runtime](https://github.com/hotdata-dev/hotdata-runtime) `pyproject.toml` is **`hotdata-runtime`** and the import package is **`hotdata_runtime`**.
 
 Use **`--no-token`** for local development so the editor does not redirect to `/auth/login` (session auth is easy to hit with a global Marimo config). For a public or shared machine, omit it and use the printed URL with an access token instead.

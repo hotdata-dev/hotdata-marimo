@@ -1,8 +1,6 @@
 import marimo
 
 __generated_with = "0.23.5"
-# Run: marimo edit examples/hotdata_basic.py --no-token -p 2721
-# This notebook is Python-only — do not add SQL cells; use the Hotdata editor UI for SQL.
 app = marimo.App()
 
 
@@ -60,12 +58,18 @@ def _(client, hm, mo):
 
 @app.cell
 def _(browser, editor, mo):
-    return mo.vstack([browser.ui, editor.ui], gap=2)
+    mo.vstack([browser.ui, editor.ui], gap=2)
+    return
 
 
 @app.cell
 def _(editor, hm):
-    return hm.query_result(editor.result)
+    # Explicitly touch nested widget values so Marimo reruns this cell on clicks.
+    _run = editor.run.value
+    _rerun = editor.rerun.value
+    _clear = editor.clear.value
+    hm.query_result(editor.result)
+    return _clear, _rerun, _run
 
 
 if __name__ == "__main__":

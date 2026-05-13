@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import marimo as mo
 
-from hotdata_core_notebook.client import HotdataClient
-from hotdata_core_notebook.health import workspace_health_lines
-from hotdata_core_notebook.result import QueryResult
+from hotdata_runtime.client import HotdataClient
+from hotdata_runtime.health import workspace_health_lines
+from hotdata_runtime.result import QueryResult
 
 
 def query_result(

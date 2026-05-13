@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import marimo as mo
 
-from hotdata_core_notebook.client import HotdataClient
-from hotdata_core_notebook.result import QueryResult
+from hotdata_runtime.client import HotdataClient
+from hotdata_runtime.result import QueryResult
 
 
 class SqlEditor:
@@ -43,6 +43,7 @@ class SqlEditor:
         )
         self._result_cache: QueryResult | None = None
         self._cached_sql: str | None = None
+        self._last_run_n: int | None = None
         self._last_rerun_n: int | None = None
         self._last_clear_n: int | None = None
         self.show_history = mo.ui.checkbox(value=False, label="Show run history")
@@ -56,6 +57,11 @@ class SqlEditor:
         return mo.vstack(
             [
                 self.sql,
+                mo.md(
+                    f"_Run clicks: {self.run.value} · "
+                    f"Rerun clicks: {self.rerun.value} · "
+                    f"Clear clicks: {self.clear.value}_"
+                ),
                 mo.hstack(
                     [
                         self.run,
@@ -85,13 +91,18 @@ class SqlEditor:
 
     @property
     def result(self) -> QueryResult:
-        if self._last_clear_n != self.clear.value:
+        run_n = self.run.value
+        rerun_n = self.rerun.value
+        clear_n = self.clear.value
+
+        if clear_n > 0 and self._last_clear_n != clear_n:
             self._result_cache = None
             self._cached_sql = None
-            self._last_clear_n = self.clear.value
+            self._last_clear_n = clear_n
+            mo.stop(True, mo.md("Result cleared. Click **Run on Hotdata** to execute again."))
 
         mo.stop(
-            self.run.value == 0 and self.rerun.value == 0,
+            run_n == 0 and rerun_n == 0,
             mo.md(
                 "**Run on Hotdata** is on the SQL editor UI (a cell that **returns** "
                 "`editor.ui` or `mo.vstack([browser.ui, editor.ui])`). Click it there, "
@@ -100,7 +111,7 @@ class SqlEditor:
         )
         sql_text = self.sql.value
 
-        if self.rerun.value > 0 and self.rerun.value != self._last_rerun_n:
+        if rerun_n > 0 and rerun_n != self._last_rerun_n:
             mo.stop(
                 self._cached_sql is None,
                 mo.md("No previous SQL to rerun yet — click **Run on Hotdata** first."),
@@ -111,24 +122,27 @@ class SqlEditor:
             ):
                 result = self._client.execute_sql(self._cached_sql or "")
             self._result_cache = result
-            self._last_rerun_n = self.rerun.value
+            self._last_rerun_n = rerun_n
+            return result
+
+        if run_n > 0 and run_n != self._last_run_n:
+            with mo.status.spinner(
+                title="Running on Hotdata",
+                subtitle="Executing query and waiting for results…",
+            ):
+                result = self._client.execute_sql(sql_text)
+            self._result_cache = result
+            self._cached_sql = sql_text
+            self._last_run_n = run_n
             return result
 
         if self._result_cache is not None and sql_text == self._cached_sql:
             return self._result_cache
 
         mo.stop(
-            self._cached_sql is not None and sql_text != self._cached_sql and self.run.value == 0,
+            self._cached_sql is None or sql_text != self._cached_sql,
             mo.md("SQL changed — click **Run on Hotdata** again to execute."),
         )
-        with mo.status.spinner(
-            title="Running on Hotdata",
-            subtitle="Executing query and waiting for results…",
-        ):
-            result = self._client.execute_sql(sql_text)
-        self._result_cache = result
-        self._cached_sql = sql_text
-        return result
 
 
 def sql_editor(

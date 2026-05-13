@@ -4,7 +4,7 @@ from typing import Any
 
 import marimo as mo
 
-from hotdata_core_notebook.client import HotdataClient
+from hotdata_runtime.client import HotdataClient
 
 
 def connection_picker(
