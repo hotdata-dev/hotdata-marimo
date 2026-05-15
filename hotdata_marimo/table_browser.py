@@ -7,6 +7,18 @@ import marimo as mo
 from hotdata_runtime.client import HotdataClient
 
 
+def _connection_options(conns: list[Any]) -> dict[str, str]:
+    counts: dict[str, int] = {}
+    options: dict[str, str] = {}
+    for c in conns:
+        label = c.name
+        count = counts.get(label, 0)
+        counts[label] = count + 1
+        key = label if count == 0 else f"{label} ({c.id})"
+        options[key] = c.id
+    return options
+
+
 def connection_picker(
     client: HotdataClient,
     *,
@@ -21,7 +33,7 @@ def connection_picker(
             label=label,
             full_width=full_width,
         )
-    options = {c.name: c.id for c in conns}
+    options = _connection_options(conns)
     return mo.ui.dropdown(
         options=options,
         label=label,

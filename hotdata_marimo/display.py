@@ -9,6 +9,19 @@ from hotdata_runtime.health import workspace_health_lines
 from hotdata_runtime.result import QueryResult
 
 
+def _option_map_with_unique_labels(
+    pairs: list[tuple[str, str]],
+) -> dict[str, str]:
+    counts: dict[str, int] = {}
+    options: dict[str, str] = {}
+    for label, value in pairs:
+        count = counts.get(label, 0)
+        counts[label] = count + 1
+        key = label if count == 0 else f"{label} ({count + 1})"
+        options[key] = value
+    return options
+
+
 def query_result(
     result: QueryResult,
     *,
@@ -61,9 +74,11 @@ class RecentResults:
         self._client = client
         listing = client.results().list_results(limit=limit, offset=0)
         self._results = listing.results
-        options = {
-            f"{r.created_at} · {r.status} · {r.id}": r.id for r in self._results
-        }
+        option_pairs = [
+            (f"{r.created_at} · {r.status} · {r.id}", r.id)
+            for r in self._results
+        ]
+        options = _option_map_with_unique_labels(option_pairs)
         self.pick = mo.ui.dropdown(
             options=options or {"(no results)": ""},
             label="Recent results",
