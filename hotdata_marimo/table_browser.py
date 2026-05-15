@@ -4,7 +4,7 @@ from typing import Any
 
 import marimo as mo
 
-from hotdata_runtime.client import HotdataClient
+from hotdata_runtime import HotdataClient
 
 
 def _connection_options(conns: list[Any]) -> dict[str, str]:
@@ -194,7 +194,10 @@ class TableBrowser:
             stack.append(self.table_pick)
             return mo.vstack(stack, gap=1)
 
-        cols = self._client.columns_for_qualified(sel)
+        cols = self._client.columns_for_qualified(
+            sel,
+            connection_id=self.selected_connection_id,
+        )
         if not cols:
             body = mo.md("_No column metadata returned (check catalog sync)._")
         else:

@@ -4,9 +4,7 @@ from __future__ import annotations
 
 import marimo as mo
 
-from hotdata_runtime.client import HotdataClient
-from hotdata_runtime.health import workspace_health_lines
-from hotdata_runtime.result import QueryResult
+from hotdata_runtime import HotdataClient, QueryResult, workspace_health_lines
 
 
 def _option_map_with_unique_labels(

@@ -2,8 +2,7 @@ from __future__ import annotations
 
 import marimo as mo
 
-from hotdata_runtime.client import HotdataClient
-from hotdata_runtime.result import QueryResult
+from hotdata_runtime import HotdataClient, QueryResult
 
 
 class SqlEditor:
