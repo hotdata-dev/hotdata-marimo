@@ -10,7 +10,10 @@ SOURCE_ROOT = REPO_ROOT / "hotdata_marimo"
 
 def test_source_uses_hotdata_runtime_root_imports() -> None:
     violations: list[str] = []
-    pattern = re.compile(r"(?m)^\s*from\s+hotdata_runtime\.(client|env|result|health)\s+import")
+    pattern = re.compile(
+        r"(?m)^\s*(?:from\s+hotdata_runtime\.(client|env|result|health)\s+import"
+        r"|import\s+hotdata_runtime\.(client|env|result|health)(?:\s|$|,|as))"
+    )
 
     for path in SOURCE_ROOT.rglob("*.py"):
         text = path.read_text(encoding="utf-8")
