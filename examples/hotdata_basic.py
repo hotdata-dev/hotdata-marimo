@@ -18,13 +18,10 @@ def _():
 @app.cell
 def _(hm, mo, os):
     mo.stop(
-        not (
-            os.environ.get("HOTDATA_API_KEY")
-            or os.environ.get("HOTDATA_TOKEN")
-        ),
+        not os.environ.get("HOTDATA_API_KEY"),
         mo.callout(
             mo.md(
-                "Add **HOTDATA_API_KEY** (or **HOTDATA_TOKEN**) to your environment "
+                "Add **HOTDATA_API_KEY** to your environment "
                 "to run this example."
             ),
             kind="warn",

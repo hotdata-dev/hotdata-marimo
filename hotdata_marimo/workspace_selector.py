@@ -77,7 +77,7 @@ class WorkspaceSelector:
 def workspace_selector_from_env(*, label: str = "Workspace") -> WorkspaceSelector:
     api_key = default_api_key()
     if not api_key:
-        raise RuntimeError("HOTDATA_API_KEY or HOTDATA_TOKEN must be set.")
+        raise RuntimeError("HOTDATA_API_KEY must be set.")
     host = default_host()
     session = default_session_id()
     return WorkspaceSelector(
