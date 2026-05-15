@@ -47,6 +47,16 @@ Marimo only shows **what you `return` from a cell**. Calling `mo.vstack(...)` or
 
 See `examples/hotdata_basic.py` for a full notebook: five Python cells (`mo.vstack` for **controls only**, then a separate cell `return hm.query_result(editor.result)` so results show immediately — **avoid** `mo.lazy` here: it only renders after the block scrolls into view, which looks like an empty cell). If Marimo shows **empty cells**, quit and remove `examples/__marimo__/` so the UI reloads from the `.py` file only.
 
+## Examples
+
+- `examples/hotdata_basic.py` — end-to-end editor + browser + result rendering flow.
+
+Run:
+
+```bash
+marimo edit examples/hotdata_basic.py --no-token
+```
+
 ## Layout
 
 This repo is intentionally thin: **API client, env helpers, and result models** live in **hotdata-runtime**; **hotdata-marimo** only adds Marimo widgets (`sql_editor`, `table_browser`, `display` for tables/status/history, `workspace_selector`). Import `HotdataClient` / `QueryResult` / `from_env` from **`hotdata_marimo`** or directly from **`hotdata_runtime`**.
