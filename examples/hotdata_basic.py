@@ -33,30 +33,17 @@ def _(hm, mo, os):
 
 @app.cell
 def _(client, hm, mo):
-    id_map = client.connection_id_by_name()
-    tpch_id = id_map.get("tpch")
-    mo.stop(
-        not tpch_id,
-        mo.callout(
-            mo.md(
-                "This example expects a connection named **tpch**. "
-                "Create it in Hotdata or adjust the name in the notebook."
-            ),
-            kind="warn",
-        ),
-    )
-    browser = hm.table_browser(client, connection_id=tpch_id)
+    browser = hm.table_browser(client)
     editor = hm.sql_editor(
         client,
-        default_sql="SELECT * FROM tpch.tpch_sf1.nation LIMIT 5",
+        default_sql="SELECT 1 AS ok",
     )
     return browser, editor
 
 
 @app.cell
 def _(browser, editor, mo):
-    mo.vstack([browser.ui, editor.ui], gap=2)
-    return
+    return mo.vstack([browser.ui, editor.ui], gap=2)
 
 
 @app.cell
@@ -65,8 +52,7 @@ def _(editor, hm):
     _run = editor.run.value
     _rerun = editor.rerun.value
     _clear = editor.clear.value
-    hm.query_result(editor.result)
-    return _clear, _rerun, _run
+    return hm.query_result(editor.result), _clear, _rerun, _run
 
 
 if __name__ == "__main__":
