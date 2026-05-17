@@ -17,7 +17,7 @@ Requires Python 3.10+, **Marimo**, and [**hotdata-runtime**](https://github.com/
 |----------|----------|-------------|
 | `HOTDATA_API_KEY` | Yes | API key for the Hotdata API |
 | `HOTDATA_API_URL` | No | API base URL (default: `https://api.hotdata.dev`) |
-| `HOTDATA_WORKSPACE_ID` | No | Workspace public id; if unset, the first active workspace is used |
+| `HOTDATA_WORKSPACE` | No | Workspace id; if unset, the first active workspace is used |
 | `HOTDATA_SANDBOX` | No | Sandbox session id, passed through to the SDK |
 
 ## Minimal notebook
