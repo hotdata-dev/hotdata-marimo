@@ -2,6 +2,16 @@
 
 Marimo UI helpers for [Hotdata](https://hotdata.dev): run SQL from a notebook, browse catalog metadata, and render results as tables.
 
+## Features
+
+- **Workspace-aware setup** — build a `HotdataClient` from environment variables, or use `workspace_selector_from_env()` to choose a workspace interactively when no workspace is pinned.
+- **Connection health** — show a compact status callout with API, workspace, and optional sandbox context.
+- **Catalog browsing** — browse Hotdata connections, schemas, tables, and columns from Marimo UI controls.
+- **SQL editor widget** — run SQL against Hotdata, cache the latest successful result, and render results in downstream reactive cells.
+- **Native `mo.sql` engine** — register `HotdataMarimoEngine` so Marimo SQL cells can execute through a live `HotdataClient` with `engine=client`.
+- **Result display helpers** — render query results, recent results, and run history as notebook-friendly UI.
+- **Marimo UI aliases** — importing `hotdata_marimo` attaches helpers such as `mo.ui.hotdata_sql_editor` and `mo.ui.hotdata_table_browser` for discoverability.
+
 ## Install
 
 ```bash
@@ -38,6 +48,28 @@ return hm.query_result(editor.result)
 Importing `hotdata_marimo` registers discoverability aliases on Marimo’s UI namespace, so you can also use `mo.ui.hotdata_sql_editor`, `mo.ui.hotdata_table_browser`, `mo.ui.hotdata_query_result`, and `mo.ui.hotdata_connection_status`.
 
 Use `hm.connection_status(client)` (or `mo.ui.hotdata_connection_status(client)`) for a small API/workspace health callout.
+
+## Marimo SQL Cells
+
+Register the Hotdata SQL engine once during setup, then pass a `HotdataClient` to Marimo SQL cells:
+
+```python
+import hotdata_marimo as hm
+
+hm.register_hotdata_sql_engine()
+client = hm.from_env()
+```
+
+```python
+_df = mo.sql(
+    """
+    SELECT 1 AS example_value
+    """,
+    engine=client,
+)
+```
+
+The engine also exposes Hotdata catalog metadata to Marimo's data-source UI. Hotdata connections are labeled **Hotdata** in the SQL connection picker.
 
 ## Two-cell pattern
 
