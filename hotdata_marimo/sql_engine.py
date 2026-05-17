@@ -5,7 +5,6 @@ from __future__ import annotations
 from collections import defaultdict
 from typing import Any, Literal
 
-from hotdata.models.table_info import TableInfo
 from hotdata_runtime import HotdataClient
 
 from marimo import _loggers
@@ -14,7 +13,6 @@ from marimo._data.models import (
     DataSourceConnection,
     DataTable,
     DataTableColumn,
-    DataType,
     Schema,
 )
 from marimo._sql.engines.types import InferenceConfig, SQLConnection
@@ -24,7 +22,7 @@ from marimo._types.ids import VariableName
 LOGGER = _loggers.marimo_logger()
 
 
-def _table_schema_name(t: TableInfo) -> str:
+def _table_schema_name(t: Any) -> str:
     return str(t.var_schema)
 
 
@@ -34,6 +32,15 @@ class HotdataMarimoEngine(SQLConnection[HotdataClient]):
     Catalog methods support Marimo's Data Sources panel. ``execute()`` only runs SQL
     via :meth:`~hotdata_runtime.HotdataClient.execute_sql` (no catalog calls in that path).
     """
+
+    def __init__(
+        self,
+        connection: HotdataClient,
+        engine_name: VariableName | None = None,
+    ) -> None:
+        super().__init__(connection, engine_name)
+        self._connections_cache: list[Any] | None = None
+        self._connection_id_cache: dict[str, str] | None = None
 
     @property
     def source(self) -> str:
@@ -65,21 +72,29 @@ class HotdataMarimoEngine(SQLConnection[HotdataClient]):
         return value
 
     def _connection_ids(self) -> dict[str, str]:
-        out: dict[str, str] = {}
-        for c in self._connection.connections().list_connections().connections:
-            out[str(c.name)] = str(c.id)
-        return out
+        if self._connection_id_cache is None:
+            self._connection_id_cache = {
+                str(c.name): str(c.id) for c in self._connections()
+            }
+        return self._connection_id_cache
 
     def _connection_id(self, connection_name: str) -> str | None:
         return self._connection_ids().get(connection_name)
+
+    def _connections(self) -> list[Any]:
+        if self._connections_cache is None:
+            self._connections_cache = list(
+                self._connection.connections().list_connections().connections
+            )
+        return self._connections_cache
 
     def _iter_grouped(
         self,
         *,
         connection_id: str | None,
         include_columns: bool,
-    ) -> dict[str, dict[str, list[TableInfo]]]:
-        grouped: dict[str, dict[str, list[TableInfo]]] = defaultdict(
+    ) -> dict[str, dict[str, list[Any]]]:
+        grouped: dict[str, dict[str, list[Any]]] = defaultdict(
             lambda: defaultdict(list)
         )
         for t in self._connection.iter_tables(
@@ -90,7 +105,7 @@ class HotdataMarimoEngine(SQLConnection[HotdataClient]):
         return grouped
 
     def get_default_database(self) -> str | None:
-        listing = self._connection.connections().list_connections().connections
+        listing = self._connections()
         if not listing:
             return None
         return str(listing[0].name)
@@ -106,7 +121,7 @@ class HotdataMarimoEngine(SQLConnection[HotdataClient]):
         include_table_details: bool | Literal["auto"],
     ) -> list[Database]:
         databases: list[Database] = []
-        for c in self._connection.connections().list_connections().connections:
+        for c in self._connections():
             name = str(c.name)
             if self._resolve_should_auto_discover(include_schemas):
                 schemas = self.get_schemas(
@@ -162,7 +177,7 @@ class HotdataMarimoEngine(SQLConnection[HotdataClient]):
             schemas.append(Schema(name=schema_name, tables=tables))
         return schemas
 
-    def _data_table_from_table_info(self, t: TableInfo) -> DataTable:
+    def _data_table_from_table_info(self, t: Any) -> DataTable:
         cols: list[DataTableColumn] = []
         for col in t.columns or []:
             cols.append(
