@@ -12,6 +12,7 @@ def _():
 
     import hotdata_marimo as hm
 
+    hm.register_hotdata_sql_engine()
     return hm, mo, os
 
 
@@ -42,7 +43,7 @@ def _(hm, workspace):
     )
     recent = hm.recent_results(client, limit=20)
     history = hm.run_history(client, limit=10)
-    return browser, editor, history, recent, status, workspace
+    return browser, client, editor, history, recent, status, workspace
 
 
 @app.cell
@@ -77,6 +78,17 @@ def _(editor, hm):
 def _(hm, recent):
     _selected = recent.pick.value
     return hm.query_result(recent.result, label="Recent result"), _selected
+
+
+@app.cell
+def _(client, mo):
+    _df = mo.sql(
+        """
+        SELECT 1 AS example_value
+        """,
+        engine=client,
+    )
+    return
 
 
 if __name__ == "__main__":

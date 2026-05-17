@@ -17,7 +17,7 @@ Requires Python 3.10+, **Marimo**, and [**hotdata-runtime**](https://github.com/
 |----------|----------|-------------|
 | `HOTDATA_API_KEY` | Yes | API key for the Hotdata API |
 | `HOTDATA_API_URL` | No | API base URL (default: `https://api.hotdata.dev`) |
-| `HOTDATA_WORKSPACE` | No | Workspace id; if unset, the first active workspace is used |
+| `HOTDATA_WORKSPACE_ID` | No | Workspace public id; if unset, the first active workspace is used |
 | `HOTDATA_SANDBOX` | No | Sandbox session id, passed through to the SDK |
 
 ## Minimal notebook
@@ -45,16 +45,16 @@ Keep the editor in one cell and consume `editor.result` in another. The editor c
 
 Marimo only shows **what you `return` from a cell**. Calling `mo.vstack(...)` or `hm.query_result(...)` without returning it produces no visible output.
 
-See `examples/hotdata_basic.py` for a full runnable notebook flow.
+See `examples/demo.py` for a full runnable notebook flow.
 
 ## Examples
 
-- `examples/hotdata_basic.py` — end-to-end browser + editor + result rendering flow.
+- `examples/demo.py` — end-to-end browser + editor + result rendering flow.
 
 Run:
 
 ```bash
-uv run marimo edit examples/hotdata_basic.py --no-token
+uv run marimo edit examples/demo.py --no-token
 ```
 
 ## Layout
@@ -68,7 +68,7 @@ This package depends on [**hotdata-runtime**](https://github.com/hotdata-dev/hot
 ```bash
 uv sync --locked
 uv run pytest
-marimo edit examples/hotdata_basic.py --no-token
+marimo edit examples/demo.py --no-token
 ```
 
 To pin **hotdata-runtime** from Git instead of the sibling path, remove the `[tool.uv.sources]` block, set the dependency line as needed, and run `uv lock` again.

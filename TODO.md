@@ -2,7 +2,7 @@
 
 ## Near term (build on MVP)
 
-- [x] **Workspace selector** — When `HOTDATA_WORKSPACE` is unset and multiple workspaces exist, expose `mo.ui.dropdown` (or similar) and rebuild the client when the choice changes.
+- [x] **Workspace selector** — When `HOTDATA_WORKSPACE_ID` is unset and multiple workspaces exist, expose `mo.ui.dropdown` (or similar) and rebuild the client when the choice changes.
 - [x] **Connection status** — Small status chip (API reachable, workspace id, optional sandbox) using a lightweight health or `workspaces`/`connections` probe.
 - [ ] **Query cancel** — Wire cancel to the query-run API if/when exposed in the OpenAPI client; surface a Cancel control next to Run.
 - [x] **`mo.ui.hotdata_*` aliases** — Re-export or thin wrappers: `hotdata_sql_editor`, `hotdata_table_browser`, `hotdata_query_result`, `hotdata_connection_picker` for discoverability.
