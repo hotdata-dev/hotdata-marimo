@@ -4,7 +4,19 @@ from typing import Any
 
 import marimo as mo
 
-from hotdata_runtime.client import HotdataClient
+from hotdata_runtime import HotdataClient
+
+
+def _connection_options(conns: list[Any]) -> dict[str, str]:
+    counts: dict[str, int] = {}
+    options: dict[str, str] = {}
+    for c in conns:
+        label = c.name
+        count = counts.get(label, 0)
+        counts[label] = count + 1
+        key = label if count == 0 else f"{label} ({c.id})"
+        options[key] = c.id
+    return options
 
 
 def connection_picker(
@@ -21,7 +33,7 @@ def connection_picker(
             label=label,
             full_width=full_width,
         )
-    options = {c.name: c.id for c in conns}
+    options = _connection_options(conns)
     return mo.ui.dropdown(
         options=options,
         label=label,
@@ -182,7 +194,10 @@ class TableBrowser:
             stack.append(self.table_pick)
             return mo.vstack(stack, gap=1)
 
-        cols = self._client.columns_for_qualified(sel)
+        cols = self._client.columns_for_qualified(
+            sel,
+            connection_id=self.selected_connection_id,
+        )
         if not cols:
             body = mo.md("_No column metadata returned (check catalog sync)._")
         else:

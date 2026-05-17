@@ -1,13 +1,12 @@
 from __future__ import annotations
 
 import marimo as mo
-from hotdata_runtime.client import HotdataClient
-from hotdata_runtime.env import (
+from hotdata_runtime import (
+    HotdataClient,
     default_api_key,
     default_host,
     default_session_id,
-    explicit_workspace_id,
-    list_workspaces,
+    resolve_workspace_selection,
 )
 
 
@@ -25,24 +24,18 @@ class WorkspaceSelector:
         self._api_key = api_key
         self._host = host or default_host()
         self._session_id = session_id
-        self._explicit = explicit_workspace_id()
-
-        workspaces = list_workspaces(api_key, self._host, session_id)
-        if not workspaces:
-            raise RuntimeError("No Hotdata workspaces found for this API key.")
-
+        selection = resolve_workspace_selection(api_key, self._host, session_id)
+        self._explicit = selection.source == "explicit_env"
         if self._explicit:
             self._pick = None
-            self._workspace_id = self._explicit
+            self._workspace_id = selection.workspace_id
             return
 
+        workspaces = selection.workspaces
         if len(workspaces) == 1:
             self._pick = None
             self._workspace_id = workspaces[0].public_id
             return
-
-        active = [w for w in workspaces if w.active]
-        chosen = active[0] if active else workspaces[0]
 
         labels: list[tuple[str, str]] = []
         seen: set[str] = set()
@@ -52,10 +45,10 @@ class WorkspaceSelector:
             seen.add(base)
             labels.append((label_text, w.public_id))
 
-        labels.sort(key=lambda t: 0 if t[1] == chosen.public_id else 1)
+        labels.sort(key=lambda t: 0 if t[1] == selection.workspace_id else 1)
         options = {k: v for k, v in labels}
         self._pick = mo.ui.dropdown(options=options, label=label, full_width=True)
-        self._workspace_id = chosen.public_id
+        self._workspace_id = selection.workspace_id
 
     @property
     def workspace_id(self) -> str:
@@ -84,7 +77,7 @@ class WorkspaceSelector:
 def workspace_selector_from_env(*, label: str = "Workspace") -> WorkspaceSelector:
     api_key = default_api_key()
     if not api_key:
-        raise RuntimeError("HOTDATA_API_KEY or HOTDATA_TOKEN must be set.")
+        raise RuntimeError("HOTDATA_API_KEY must be set.")
     host = default_host()
     session = default_session_id()
     return WorkspaceSelector(

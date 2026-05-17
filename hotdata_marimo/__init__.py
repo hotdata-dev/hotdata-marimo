@@ -16,6 +16,11 @@ from hotdata_marimo.display import (
     recent_results,
     run_history,
 )
+from hotdata_marimo.sql_engine import (
+    HotdataMarimoEngine,
+    register_hotdata_sql_engine,
+    unregister_hotdata_sql_engine,
+)
 from hotdata_marimo.sql_editor import SqlEditor, sql_editor
 from hotdata_marimo.table_browser import TableBrowser, connection_picker, table_browser
 from hotdata_marimo.workspace_selector import WorkspaceSelector, workspace_selector_from_env
@@ -23,6 +28,7 @@ from hotdata_marimo.workspace_selector import WorkspaceSelector, workspace_selec
 __all__ = [
     "__version__",
     "HotdataClient",
+    "HotdataMarimoEngine",
     "QueryResult",
     "RecentResults",
     "SqlEditor",
@@ -39,11 +45,13 @@ __all__ = [
     "hotdata_workspace_selector",
     "query_result",
     "recent_results",
+    "register_hotdata_sql_engine",
+    "register_mo_ui_hotdata_aliases",
     "run_history",
     "sql_editor",
     "table_browser",
+    "unregister_hotdata_sql_engine",
     "workspace_selector_from_env",
-    "register_mo_ui_hotdata_aliases",
 ]
 
 hotdata_sql_editor = sql_editor

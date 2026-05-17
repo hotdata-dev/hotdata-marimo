@@ -4,9 +4,20 @@ from __future__ import annotations
 
 import marimo as mo
 
-from hotdata_runtime.client import HotdataClient
-from hotdata_runtime.health import workspace_health_lines
-from hotdata_runtime.result import QueryResult
+from hotdata_runtime import HotdataClient, QueryResult, workspace_health_lines
+
+
+def _option_map_with_unique_labels(
+    pairs: list[tuple[str, str]],
+) -> dict[str, str]:
+    counts: dict[str, int] = {}
+    options: dict[str, str] = {}
+    for label, value in pairs:
+        count = counts.get(label, 0)
+        counts[label] = count + 1
+        key = label if count == 0 else f"{label} ({count + 1})"
+        options[key] = value
+    return options
 
 
 def query_result(
@@ -27,17 +38,18 @@ def query_result(
         )
     else:
         trunc = None
+    meta = result.metadata_dict()
     meta_bits = []
-    if result.result_id:
-        meta_bits.append(f"**result_id** `{result.result_id}`")
-    if result.query_run_id:
-        meta_bits.append(f"**query_run_id** `{result.query_run_id}`")
-    if result.execution_time_ms is not None:
-        meta_bits.append(f"**execution_time_ms** {result.execution_time_ms}")
-    if result.warning:
-        meta_bits.append(f"**warning** {result.warning}")
-    if result.error_message:
-        meta_bits.append(f"**error** {result.error_message}")
+    if meta["result_id"]:
+        meta_bits.append(f"**result_id** `{meta['result_id']}`")
+    if meta["query_run_id"]:
+        meta_bits.append(f"**query_run_id** `{meta['query_run_id']}`")
+    if meta["execution_time_ms"] is not None:
+        meta_bits.append(f"**execution_time_ms** {meta['execution_time_ms']}")
+    if meta["warning"]:
+        meta_bits.append(f"**warning** {meta['warning']}")
+    if meta["error_message"]:
+        meta_bits.append(f"**error** {meta['error_message']}")
     header = mo.md(" · ".join(meta_bits) if meta_bits else "_No metadata._")
     df = result.to_pandas()
     tbl = mo.ui.table(
@@ -59,11 +71,12 @@ def query_result(
 class RecentResults:
     def __init__(self, client: HotdataClient, *, limit: int = 50) -> None:
         self._client = client
-        listing = client.results().list_results(limit=limit, offset=0)
-        self._results = listing.results
-        options = {
-            f"{r.created_at} · {r.status} · {r.id}": r.id for r in self._results
-        }
+        self._results = client.list_recent_results(limit=limit, offset=0)
+        option_pairs = [
+            (f"{r.created_at} · {r.status} · {r.result_id}", r.result_id)
+            for r in self._results
+        ]
+        options = _option_map_with_unique_labels(option_pairs)
         self.pick = mo.ui.dropdown(
             options=options or {"(no results)": ""},
             label="Recent results",
@@ -97,7 +110,7 @@ def run_history(
     limit: int = 20,
     label: str = "Run history",
 ):
-    runs = client.query_runs().list_query_runs(limit=limit).query_runs
+    runs = client.list_run_history(limit=limit)
     if not runs:
         return mo.md("_No query runs returned._")
 
@@ -105,12 +118,11 @@ def run_history(
     for r in runs:
         rows.append(
             {
-                "created_at": getattr(r, "created_at", None),
-                "status": getattr(r, "status", None),
-                "execution_time_ms": getattr(r, "execution_time_ms", None),
-                "result_id": getattr(r, "result_id", None),
-                "query_run_id": getattr(r, "id", None)
-                or getattr(r, "query_run_id", None),
+                "created_at": r.created_at,
+                "status": r.status,
+                "execution_time_ms": r.execution_time_ms,
+                "result_id": r.result_id,
+                "query_run_id": r.query_run_id,
             }
         )
 
