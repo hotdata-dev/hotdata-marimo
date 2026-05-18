@@ -88,33 +88,22 @@ class SqlEditor:
             gap=1,
         )
 
-    @property
-    def result(self) -> QueryResult:
-        run_n = self.run.value
-        rerun_n = self.rerun.value
-        clear_n = self.clear.value
-
+    def _apply_clear(self, clear_n: int) -> bool:
         if clear_n > 0 and self._last_clear_n != clear_n:
             self._result_cache = None
             self._cached_sql = None
             self._last_clear_n = clear_n
-            mo.stop(True, mo.md("Result cleared. Click **Run on Hotdata** to execute again."))
+            return True
+        return False
 
-        mo.stop(
-            run_n == 0 and rerun_n == 0,
-            mo.md(
-                "**Run on Hotdata** is on the SQL editor UI (a cell that **returns** "
-                "`editor.ui` or `mo.vstack([browser.ui, editor.ui])`). Click it there, "
-                "then this cell will run."
-            ),
-        )
+    def _execute_or_cached(self) -> QueryResult | None:
         sql_text = self.sql.value
+        run_n = self.run.value
+        rerun_n = self.rerun.value
 
         if rerun_n > 0 and rerun_n != self._last_rerun_n:
-            mo.stop(
-                self._cached_sql is None,
-                mo.md("No previous SQL to rerun yet — click **Run on Hotdata** first."),
-            )
+            if self._cached_sql is None:
+                return None
             with mo.status.spinner(
                 title="Running on Hotdata",
                 subtitle="Re-running last query and waiting for results…",
@@ -138,8 +127,69 @@ class SqlEditor:
         if self._result_cache is not None and sql_text == self._cached_sql:
             return self._result_cache
 
+        return None
+
+    @property
+    def result_panel(self):
+        from hotdata_marimo.display import query_result
+
+        run_n = self.run.value
+        rerun_n = self.rerun.value
+        clear_n = self.clear.value
+
+        if self._apply_clear(clear_n):
+            return mo.md("Result cleared. Click **Run on Hotdata** to execute again.")
+
+        if run_n == 0 and rerun_n == 0 and self._result_cache is None:
+            return mo.md("_Click **Run on Hotdata** to execute._")
+
+        if rerun_n > 0 and rerun_n != self._last_rerun_n and self._cached_sql is None:
+            return mo.md("No previous SQL to rerun yet — click **Run on Hotdata** first.")
+
+        result = self._execute_or_cached()
+        if result is not None:
+            return query_result(result)
+
+        return mo.md("SQL changed — click **Run on Hotdata** again to execute.")
+
+    @property
+    def tab_ui(self):
+        _ = self.run.value
+        _ = self.rerun.value
+        _ = self.clear.value
+        _ = self.show_history.value
+        return mo.vstack([self.ui, self.result_panel], gap=2)
+
+    @property
+    def result(self) -> QueryResult:
+        run_n = self.run.value
+        rerun_n = self.rerun.value
+        clear_n = self.clear.value
+
+        if self._apply_clear(clear_n):
+            mo.stop(True, mo.md("Result cleared. Click **Run on Hotdata** to execute again."))
+
         mo.stop(
-            self._cached_sql is None or sql_text != self._cached_sql,
+            run_n == 0 and rerun_n == 0,
+            mo.md(
+                "**Run on Hotdata** is on the SQL editor UI (a cell that **returns** "
+                "`editor.ui` or `mo.vstack([browser.ui, editor.ui])`). Click it there, "
+                "then this cell will run."
+            ),
+        )
+
+        if rerun_n > 0 and rerun_n != self._last_rerun_n:
+            mo.stop(
+                self._cached_sql is None,
+                mo.md("No previous SQL to rerun yet — click **Run on Hotdata** first."),
+            )
+
+        result = self._execute_or_cached()
+        if result is not None:
+            return result
+
+        mo.stop(
+            True,
             mo.md("SQL changed — click **Run on Hotdata** again to execute."),
         )
 

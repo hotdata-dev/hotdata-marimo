@@ -128,6 +128,28 @@ def test_connections_panel_lists_connections(mock_client):
     assert panel is not None
 
 
+def test_recent_results_table_selection(mock_client):
+    mock_client.list_recent_results.return_value = [
+        SimpleNamespace(
+            created_at="2026-05-18T12:00:00Z",
+            status="succeeded",
+            result_id="res_1",
+        ),
+        SimpleNamespace(
+            created_at="2026-05-18T11:00:00Z",
+            status="failed",
+            result_id="res_2",
+        ),
+    ]
+    table = MagicMock()
+    table.value = [{"result_id": "res_2"}]
+    with patch("hotdata_marimo.display.mo.ui.table", return_value=table):
+        recent = hm.recent_results(mock_client, limit=20)
+    assert recent.selected_result_id == "res_2"
+    table.value = []
+    assert recent.selected_result_id is None
+
+
 def test_table_browser_rebuilds_tables_when_connection_changes(mock_client):
     pick = MagicMock()
     pick.value = ""

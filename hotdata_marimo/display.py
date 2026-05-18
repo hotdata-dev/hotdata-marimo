@@ -6,8 +6,6 @@ import marimo as mo
 
 from hotdata_runtime import HotdataClient, QueryResult, workspace_health_lines
 
-from hotdata_marimo._options import empty_dropdown, unique_label_options
-
 
 def query_result(
     result: QueryResult,
@@ -61,36 +59,71 @@ class RecentResults:
     def __init__(self, client: HotdataClient, *, limit: int = 50) -> None:
         self._client = client
         self._results = client.list_recent_results(limit=limit, offset=0)
-        option_pairs = [
-            (f"{r.created_at} · {r.status} · {r.result_id}", r.result_id)
+        self._rows: list[dict[str, object]] = [
+            {
+                "created_at": r.created_at,
+                "status": r.status,
+                "result_id": r.result_id,
+            }
             for r in self._results
         ]
-        options = unique_label_options(option_pairs)
-        self.pick = (
-            empty_dropdown(label="Recent results", message="(no results)")
-            if not options
-            else mo.ui.dropdown(
-                options=options,
+        self.table = (
+            mo.ui.table(
+                self._rows,
                 label="Recent results",
-                full_width=True,
+                pagination=True,
+                page_size=min(10, limit),
+                selection="single",
+                max_height=320,
             )
+            if self._rows
+            else None
         )
 
     @property
     def selected_result_id(self) -> str | None:
-        v = self.pick.value
-        return v if v else None
+        if self.table is None:
+            return None
+        selected = self.table.value
+        if not selected:
+            return None
+        row = selected[0]
+        if not isinstance(row, dict):
+            return None
+        rid = row.get("result_id")
+        return rid if rid else None
 
     @property
     def result(self) -> QueryResult:
         rid = self.selected_result_id
-        mo.stop(rid is None, mo.md("Pick a result id to load."))
+        mo.stop(rid is None, mo.md("Select a result row to load."))
         return self._client.get_result(rid or "")
 
     @property
+    def result_panel(self):
+        rid = self.selected_result_id
+        if rid is None:
+            return mo.md("_Select a result row to load._")
+        return query_result(self._client.get_result(rid), label="Recent result")
+
+    @property
+    def tab_ui(self):
+        if self.table is not None:
+            _ = self.table.value
+        return mo.vstack([self.ui, self.result_panel], gap=2)
+
+    @property
     def ui(self):
-        _ = self.pick.value
-        return mo.vstack([self.pick], gap=1)
+        if self.table is None:
+            return mo.md("_No recent results._")
+        _ = self.table.value
+        return mo.vstack(
+            [
+                mo.md("### Recent results"),
+                self.table,
+            ],
+            gap=1,
+        )
 
 
 def recent_results(client: HotdataClient, *, limit: int = 50) -> RecentResults:
