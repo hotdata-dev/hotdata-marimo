@@ -69,18 +69,18 @@ def _(browser, editor, history, mo, recent, status, workspace):
 
 
 @app.cell
-def _(editor, hm):
+def _(editor):
     # Explicitly touch nested widget values so Marimo reruns this cell on clicks.
     _run = editor.run.value
     _rerun = editor.rerun.value
     _clear = editor.clear.value
-    return hm.query_result(editor.result)
+    return
 
 
 @app.cell
-def _(hm, recent):
+def _(recent):
     _selected = recent.pick.value
-    return hm.query_result(recent.result, label="Recent result"), _selected
+    return
 
 
 @app.cell
