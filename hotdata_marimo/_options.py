@@ -52,14 +52,12 @@ def connection_options(conns: list[Any]) -> dict[str, str]:
     )
 
 
-def connection_picker(
-    client: HotdataClient,
+def connection_picker_from_connections(
+    conns: list[Any],
     *,
     label: str = "Connection",
     full_width: bool = True,
 ):
-    listing = client.connections().list_connections()
-    conns = listing.connections
     if not conns:
         return empty_dropdown(
             label=label,
@@ -73,6 +71,20 @@ def connection_picker(
     )
 
 
+def connection_picker(
+    client: HotdataClient,
+    *,
+    label: str = "Connection",
+    full_width: bool = True,
+):
+    conns = client.connections().list_connections().connections
+    return connection_picker_from_connections(
+        conns,
+        label=label,
+        full_width=full_width,
+    )
+
+
 def resolve_connection_picker(
     client: HotdataClient,
     *,
@@ -80,10 +92,16 @@ def resolve_connection_picker(
     full_width: bool = True,
 ) -> tuple[Any | None, str | None]:
     """Return ``(dropdown_or_none, implicit_connection_id)`` for table browsers."""
-    listing = client.connections().list_connections()
-    conns = listing.connections
+    conns = client.connections().list_connections().connections
     if not conns:
         return None, ""
     if len(conns) == 1:
         return None, conns[0].id
-    return connection_picker(client, label=label, full_width=full_width), None
+    return (
+        connection_picker_from_connections(
+            conns,
+            label=label,
+            full_width=full_width,
+        ),
+        None,
+    )
