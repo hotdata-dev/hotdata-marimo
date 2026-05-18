@@ -71,30 +71,48 @@ def _(browser):
 
 
 @app.cell
-def _(browser_ui, editor, history, mo, recent, status, workspace):
+def _(editor):
+    editor_ui = editor.ui
+    return (editor_ui,)
+
+
+@app.cell
+def _(editor, hm):
+    _run = editor.run.value
+    _rerun = editor.rerun.value
+    _clear = editor.clear.value
+    sql_result = hm.query_result(editor.result)
+    return (sql_result,)
+
+
+@app.cell
+def _(editor_ui, mo, sql_result):
+    sql_tab = mo.vstack([editor_ui, sql_result], gap=2)
+    return (sql_tab,)
+
+
+@app.cell
+def _(hm, recent):
+    recent_result = hm.query_result(recent.result, label="Recent result")
+    return (recent_result,)
+
+
+@app.cell
+def _(mo, recent, recent_result):
+    recent_tab = mo.vstack([recent.ui, recent_result], gap=2)
+    return (recent_tab,)
+
+
+@app.cell
+def _(browser_ui, history, mo, recent_tab, sql_tab, status, workspace):
     mo.ui.tabs({
         "Workspaces": workspace.ui,
         "Connections": status,
         "Datasets": browser_ui,
-        "SQL query": editor.ui,
-        "Recent results": recent.ui,
+        "SQL query": sql_tab,
+        "Recent results": recent_tab,
         "Run history": history,
     })
-    return
-
-
-@app.cell
-def _(editor):
-    # Explicitly touch nested widget values so Marimo reruns this cell on clicks.
-    _run = editor.run.value
-    _rerun = editor.rerun.value
-    _clear = editor.clear.value
-    return
-
-
-@app.cell
-def _(recent):
-    _selected = recent.pick.value
     return
 
 
