@@ -66,7 +66,8 @@ def _(browser):
 
 @app.cell
 def _(browser):
-    return (browser.ui,)
+    browser_ui = browser.ui
+    return (browser_ui,)
 
 
 @app.cell
