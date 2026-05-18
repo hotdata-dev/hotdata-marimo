@@ -7,9 +7,8 @@ import pytest
 
 import hotdata_marimo as hm
 from hotdata_runtime import HotdataClient
-from hotdata_marimo.display import _option_map_with_unique_labels
+from hotdata_marimo._options import connection_options, unique_label_options
 from hotdata_marimo.sql_engine import HotdataMarimoEngine
-from hotdata_marimo.table_browser import _connection_options
 from hotdata_marimo.workspace_selector import WorkspaceSelector, workspace_selector_from_env
 from marimo._types.ids import VariableName
 
@@ -39,8 +38,8 @@ def _workspace_row(name: str, public_id: str, *, active: bool = True):
         ),
     ],
 )
-def test_option_map_with_unique_labels(labels, expected):
-    assert _option_map_with_unique_labels(labels) == expected
+def test_unique_label_options(labels, expected):
+    assert unique_label_options(labels) == expected
 
 
 def test_connection_options_disambiguates_duplicate_names():
@@ -49,7 +48,7 @@ def test_connection_options_disambiguates_duplicate_names():
         SimpleNamespace(name="Warehouse", id="conn_2"),
         SimpleNamespace(name="Analytics", id="conn_3"),
     ]
-    assert _connection_options(conns) == {
+    assert connection_options(conns) == {
         "Warehouse": "conn_1",
         "Warehouse (conn_2)": "conn_2",
         "Analytics": "conn_3",

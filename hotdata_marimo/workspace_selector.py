@@ -9,6 +9,8 @@ from hotdata_runtime import (
     resolve_workspace_selection,
 )
 
+from hotdata_marimo._options import unique_label_options
+
 
 class WorkspaceSelector:
     """Workspace picker that rebuilds `HotdataClient` as selection changes."""
@@ -37,17 +39,20 @@ class WorkspaceSelector:
             self._workspace_id = workspaces[0].public_id
             return
 
-        labels: list[tuple[str, str]] = []
-        seen: set[str] = set()
-        for w in workspaces:
-            base = w.name
-            label_text = base if base not in seen else f"{base} ({w.public_id})"
-            seen.add(base)
-            labels.append((label_text, w.public_id))
-
-        labels.sort(key=lambda t: 0 if t[1] == selection.workspace_id else 1)
-        options = {k: v for k, v in labels}
-        self._pick = mo.ui.dropdown(options=options, label=label, full_width=True)
+        pairs = [(w.name, w.public_id) for w in workspaces]
+        options = unique_label_options(
+            pairs,
+            disambiguate=lambda name, public_id, count: f"{name} ({public_id})",
+        )
+        items = sorted(
+            options.items(),
+            key=lambda item: 0 if item[1] == selection.workspace_id else 1,
+        )
+        self._pick = mo.ui.dropdown(
+            options=dict(items),
+            label=label,
+            full_width=True,
+        )
         self._workspace_id = selection.workspace_id
 
     @property

@@ -6,18 +6,7 @@ import marimo as mo
 
 from hotdata_runtime import HotdataClient, QueryResult, workspace_health_lines
 
-
-def _option_map_with_unique_labels(
-    pairs: list[tuple[str, str]],
-) -> dict[str, str]:
-    counts: dict[str, int] = {}
-    options: dict[str, str] = {}
-    for label, value in pairs:
-        count = counts.get(label, 0)
-        counts[label] = count + 1
-        key = label if count == 0 else f"{label} ({count + 1})"
-        options[key] = value
-    return options
+from hotdata_marimo._options import empty_dropdown, unique_label_options
 
 
 def query_result(
@@ -76,11 +65,15 @@ class RecentResults:
             (f"{r.created_at} · {r.status} · {r.result_id}", r.result_id)
             for r in self._results
         ]
-        options = _option_map_with_unique_labels(option_pairs)
-        self.pick = mo.ui.dropdown(
-            options=options or {"(no results)": ""},
-            label="Recent results",
-            full_width=True,
+        options = unique_label_options(option_pairs)
+        self.pick = (
+            empty_dropdown(label="Recent results", message="(no results)")
+            if not options
+            else mo.ui.dropdown(
+                options=options,
+                label="Recent results",
+                full_width=True,
+            )
         )
 
     @property

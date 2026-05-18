@@ -40,7 +40,6 @@ class HotdataMarimoEngine(SQLConnection[HotdataClient]):
     ) -> None:
         super().__init__(connection, engine_name)
         self._connections_cache: list[Any] | None = None
-        self._connection_id_cache: dict[str, str] | None = None
 
     @property
     def source(self) -> str:
@@ -71,15 +70,12 @@ class HotdataMarimoEngine(SQLConnection[HotdataClient]):
             return True
         return value
 
-    def _connection_ids(self) -> dict[str, str]:
-        if self._connection_id_cache is None:
-            self._connection_id_cache = {
-                str(c.name): str(c.id) for c in self._connections()
-            }
-        return self._connection_id_cache
-
     def _connection_id(self, connection_name: str) -> str | None:
-        return self._connection_ids().get(connection_name)
+        try:
+            return self._connection.connection_id_by_name().get(connection_name)
+        except RuntimeError as e:
+            LOGGER.warning("%s", e)
+            return None
 
     def _connections(self) -> list[Any]:
         if self._connections_cache is None:
