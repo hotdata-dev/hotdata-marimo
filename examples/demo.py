@@ -35,7 +35,7 @@ def _(hm, mo, os):
 @app.cell
 def _(hm, workspace):
     client = workspace.client
-    status = hm.connection_status(client)
+    status = hm.connections_panel(client)
     browser = hm.table_browser(client)
     editor = hm.sql_editor(
         client,

@@ -8,6 +8,7 @@ import pytest
 import hotdata_marimo as hm
 from hotdata_runtime import HotdataClient
 from hotdata_marimo._options import connection_options, unique_label_options
+from hotdata_marimo.display import connections_panel
 from hotdata_marimo.sql_engine import HotdataMarimoEngine
 from hotdata_marimo.workspace_selector import WorkspaceSelector, workspace_selector_from_env
 from marimo._types.ids import VariableName
@@ -102,6 +103,28 @@ def test_workspace_selector(resolve, expect_dropdown, expected_workspace):
     assert (selector._pick is not None) is expect_dropdown
     assert selector.workspace_id == expected_workspace
     assert selector.client.workspace_id == expected_workspace
+
+
+def test_connections_panel_lists_connections(mock_client):
+    mock_client.connections.return_value.list_connections.return_value = (
+        SimpleNamespace(
+            connections=[
+                SimpleNamespace(
+                    name="Warehouse",
+                    id="conn_1",
+                    source_type="postgres",
+                ),
+                SimpleNamespace(
+                    name="Analytics",
+                    id="conn_2",
+                    source_type="snowflake",
+                ),
+            ]
+        )
+    )
+    with patch("hotdata_marimo.display.workspace_health_lines", return_value=(True, ["ok"])):
+        panel = connections_panel(mock_client)
+    assert panel is not None
 
 
 def test_workspace_selector_from_env_requires_api_key(monkeypatch: pytest.MonkeyPatch):

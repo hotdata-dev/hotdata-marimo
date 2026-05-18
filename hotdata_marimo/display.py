@@ -143,3 +143,34 @@ def connection_status(client: HotdataClient):
         mo.md(f"**API** error — {parts[0]}"),
         kind="danger",
     )
+
+
+def connections_panel(client: HotdataClient):
+    """Workspace health callout plus a table of configured connections."""
+    status = connection_status(client)
+    conns = client.connections().list_connections().connections
+    if not conns:
+        return mo.vstack([status, mo.md("_No connections in this workspace._")], gap=1)
+    rows: list[dict[str, object]] = []
+    for c in conns:
+        rows.append(
+            {
+                "name": c.name,
+                "id": c.id,
+                "source_type": getattr(c, "source_type", None),
+            }
+        )
+    return mo.vstack(
+        [
+            status,
+            mo.ui.table(
+                rows,
+                label="Connections",
+                pagination=True,
+                page_size=min(10, len(rows)),
+                selection=None,
+                max_height=320,
+            ),
+        ],
+        gap=1,
+    )
