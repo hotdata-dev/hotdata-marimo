@@ -43,50 +43,53 @@ def _(hm, workspace):
     )
     recent = hm.recent_results(client, limit=20)
     history = hm.run_history(client, limit=10)
-    return browser, client, editor, history, recent, status, workspace
+    return browser, client, editor, history, recent, status
 
 
 @app.cell
-def _(browser, editor, mo, recent, status, workspace):
-    return mo.vstack(
-        [
-            workspace.ui,
-            status,
-            browser.ui,
-            editor.ui,
-            recent.ui,
-        ],
-        gap=2,
-    )
+def _(mo):
+    mo.md(r"""
+    ## HotData explorer
+    Use the tabs below to switch between available workspaces, connection status, dataset browsing, and SQL queries.
+    """)
+    return
 
 
 @app.cell
-def _(history):
-    return history
+def _(browser, editor, history, mo, recent, status, workspace):
+    mo.ui.tabs({
+        "Workspaces": workspace,
+        "Connections": status,
+        "Datasets": browser,
+        "SQL query": editor,
+        "Recent results": recent,
+        "Run history": history,
+    })
+    return
 
 
 @app.cell
-def _(editor, hm):
+def _(editor):
     # Explicitly touch nested widget values so Marimo reruns this cell on clicks.
     _run = editor.run.value
     _rerun = editor.rerun.value
     _clear = editor.clear.value
-    return hm.query_result(editor.result), _clear, _rerun, _run
+    return
 
 
 @app.cell
-def _(hm, recent):
+def _(recent):
     _selected = recent.pick.value
-    return hm.query_result(recent.result, label="Recent result"), _selected
+    return
 
 
 @app.cell
 def _(client, mo):
     _df = mo.sql(
-        """
+        f"""
         SELECT 1 AS example_value
         """,
-        engine=client,
+        engine=client
     )
     return
 
