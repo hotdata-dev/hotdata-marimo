@@ -43,6 +43,7 @@ class TableBrowser:
             )
 
         self._table_pick_ctx: str | None = None
+        self._rebuilt_table_pick_this_run = False
         self._init_table_pick()
 
     def _init_table_pick(self) -> None:
@@ -53,6 +54,7 @@ class TableBrowser:
             )
             self._empty_catalog = True
             self._all_names = []
+            self._table_pick_ctx = ""
             return
 
         names = self._names_for_active_connection()
@@ -120,35 +122,42 @@ class TableBrowser:
         v = self.table_pick.value
         return v if v else None
 
+    def _sync_table_catalog(self) -> None:
+        """Refresh the table dropdown when the active connection changes."""
+        if self._conn_pick is not None:
+            _ = self._conn_pick.value  # type: ignore[attr-defined]
+        cid = self._active_connection_id()
+        if not cid:
+            return
+        if cid == self._table_pick_ctx:
+            return
+        self._rebuild_table_pick(self._names_for_active_connection())
+
     @property
     def ui(self):
         self._rebuilt_table_pick_this_run = False
-
-        if self._conn_pick is not None:
-            _ = self._conn_pick.value
-
-        cid = self._active_connection_id()
-        names = self._names_for_active_connection()
-
-        if cid and cid != self._table_pick_ctx:
-            self._rebuild_table_pick(names)
+        self._sync_table_catalog()
 
         if not self._rebuilt_table_pick_this_run:
             _ = self.table_pick.value
 
         sel = None if self._rebuilt_table_pick_this_run else self.selected_table
+        cid = self._active_connection_id()
         conn_header = (
             mo.md(f"**Connection** `{self._active_connection_id()}`")
             if self._active_connection_id()
             else None
         )
         if not sel:
-            hint = (
-                "_No tables returned from the information schema. "
-                "Try refreshing a connection in Hotdata._"
-                if self._empty_catalog
-                else "Choose a table below (search inside the dropdown when needed)."
-            )
+            if self._conn_pick is not None and not cid:
+                hint = "Choose a connection above to load tables."
+            elif self._empty_catalog:
+                hint = (
+                    "_No tables returned from the information schema. "
+                    "Try refreshing a connection in Hotdata._"
+                )
+            else:
+                hint = "Choose a table below (search inside the dropdown when needed)."
             stack = [
                 mo.md(
                     f"**Workspace** `{self._client.workspace_id}` — {hint}"

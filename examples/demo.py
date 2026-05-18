@@ -56,11 +56,25 @@ def _(mo):
 
 
 @app.cell
-def _(browser, editor, history, mo, recent, status, workspace):
+def _(browser):
+    # Register connection/table widget deps so Marimo reruns layout cells on change.
+    if browser._conn_pick is not None:
+        _ = browser._conn_pick.value
+    _ = browser.table_pick.value
+    return
+
+
+@app.cell
+def _(browser):
+    return (browser.ui,)
+
+
+@app.cell
+def _(browser_ui, editor, history, mo, recent, status, workspace):
     mo.ui.tabs({
         "Workspaces": workspace.ui,
         "Connections": status,
-        "Datasets": browser.ui,
+        "Datasets": browser_ui,
         "SQL query": editor.ui,
         "Recent results": recent.ui,
         "Run history": history,

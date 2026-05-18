@@ -10,6 +10,7 @@ from hotdata_runtime import HotdataClient
 from hotdata_marimo._options import connection_options, unique_label_options
 from hotdata_marimo.display import connections_panel
 from hotdata_marimo.sql_engine import HotdataMarimoEngine
+from hotdata_marimo.table_browser import TableBrowser
 from hotdata_marimo.workspace_selector import WorkspaceSelector, workspace_selector_from_env
 from marimo._types.ids import VariableName
 
@@ -125,6 +126,28 @@ def test_connections_panel_lists_connections(mock_client):
     with patch("hotdata_marimo.display.workspace_health_lines", return_value=(True, ["ok"])):
         panel = connections_panel(mock_client)
     assert panel is not None
+
+
+def test_table_browser_rebuilds_tables_when_connection_changes(mock_client):
+    pick = MagicMock()
+    pick.value = ""
+    mock_client.list_qualified_table_names.return_value = []
+
+    with patch(
+        "hotdata_marimo.table_browser.resolve_connection_picker",
+        return_value=(pick, None),
+    ):
+        browser = TableBrowser(mock_client)
+
+    browser._sync_table_catalog()
+    assert browser._table_pick_ctx == ""
+
+    pick.value = "conn_1"
+    mock_client.list_qualified_table_names.return_value = ["azure.public.customer"]
+    browser._sync_table_catalog()
+    assert browser._table_pick_ctx == "conn_1"
+    assert browser._all_names == ["azure.public.customer"]
+    assert not browser._empty_catalog
 
 
 def test_workspace_selector_from_env_requires_api_key(monkeypatch: pytest.MonkeyPatch):
