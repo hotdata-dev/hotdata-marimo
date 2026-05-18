@@ -46,6 +46,9 @@ def _(mo):
     mo.md(r"""
     ## HotData explorer
     Use the tabs below to switch between workspaces, connection status, recent results, and run history.
+
+    On a shared or networked host, run Marimo **without** `--no-token` and open the printed URL
+    with its access token so only you can use this notebook.
     """)
     return
 
@@ -70,7 +73,7 @@ def _(history, mo, recent_tab, status, workspace):
 @app.cell
 def _(client, mo):
     _df = mo.sql(
-        f"""
+        """
         SELECT 1 AS example_value
         """,
         engine=client

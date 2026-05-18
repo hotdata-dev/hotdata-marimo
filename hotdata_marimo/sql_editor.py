@@ -56,11 +56,6 @@ class SqlEditor:
         return mo.vstack(
             [
                 self.sql,
-                mo.md(
-                    f"_Run clicks: {self.run.value} · "
-                    f"Rerun clicks: {self.rerun.value} · "
-                    f"Clear clicks: {self.clear.value}_"
-                ),
                 mo.hstack(
                     [
                         self.run,
