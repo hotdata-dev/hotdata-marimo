@@ -12,6 +12,7 @@ from hotdata_runtime import HotdataClient, QueryResult, from_env
 from hotdata_marimo.display import (
     RecentResults,
     connection_status,
+    connections_panel,
     query_result,
     recent_results,
     run_history,
@@ -36,6 +37,7 @@ __all__ = [
     "WorkspaceSelector",
     "connection_picker",
     "connection_status",
+    "connections_panel",
     "from_env",
     "hotdata_connection_picker",
     "hotdata_query_result",

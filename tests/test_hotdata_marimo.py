@@ -7,9 +7,10 @@ import pytest
 
 import hotdata_marimo as hm
 from hotdata_runtime import HotdataClient
-from hotdata_marimo.display import _option_map_with_unique_labels
+from hotdata_marimo._options import connection_options, unique_label_options
+from hotdata_marimo.display import connections_panel
 from hotdata_marimo.sql_engine import HotdataMarimoEngine
-from hotdata_marimo.table_browser import _connection_options
+from hotdata_marimo.table_browser import TableBrowser
 from hotdata_marimo.workspace_selector import WorkspaceSelector, workspace_selector_from_env
 from marimo._types.ids import VariableName
 
@@ -39,8 +40,8 @@ def _workspace_row(name: str, public_id: str, *, active: bool = True):
         ),
     ],
 )
-def test_option_map_with_unique_labels(labels, expected):
-    assert _option_map_with_unique_labels(labels) == expected
+def test_unique_label_options(labels, expected):
+    assert unique_label_options(labels) == expected
 
 
 def test_connection_options_disambiguates_duplicate_names():
@@ -49,7 +50,7 @@ def test_connection_options_disambiguates_duplicate_names():
         SimpleNamespace(name="Warehouse", id="conn_2"),
         SimpleNamespace(name="Analytics", id="conn_3"),
     ]
-    assert _connection_options(conns) == {
+    assert connection_options(conns) == {
         "Warehouse": "conn_1",
         "Warehouse (conn_2)": "conn_2",
         "Analytics": "conn_3",
@@ -103,6 +104,72 @@ def test_workspace_selector(resolve, expect_dropdown, expected_workspace):
     assert (selector._pick is not None) is expect_dropdown
     assert selector.workspace_id == expected_workspace
     assert selector.client.workspace_id == expected_workspace
+
+
+def test_connections_panel_lists_connections(mock_client):
+    mock_client.connections.return_value.list_connections.return_value = (
+        SimpleNamespace(
+            connections=[
+                SimpleNamespace(
+                    name="Warehouse",
+                    id="conn_1",
+                    source_type="postgres",
+                ),
+                SimpleNamespace(
+                    name="Analytics",
+                    id="conn_2",
+                    source_type="snowflake",
+                ),
+            ]
+        )
+    )
+    with patch("hotdata_marimo.display.workspace_health_lines", return_value=(True, ["ok"])):
+        panel = connections_panel(mock_client)
+    assert panel is not None
+
+
+def test_recent_results_table_selection(mock_client):
+    mock_client.list_recent_results.return_value = [
+        SimpleNamespace(
+            created_at="2026-05-18T12:00:00Z",
+            status="succeeded",
+            result_id="res_1",
+        ),
+        SimpleNamespace(
+            created_at="2026-05-18T11:00:00Z",
+            status="failed",
+            result_id="res_2",
+        ),
+    ]
+    table = MagicMock()
+    table.value = [{"result_id": "res_2"}]
+    with patch("hotdata_marimo.display.mo.ui.table", return_value=table):
+        recent = hm.recent_results(mock_client, limit=20)
+    assert recent.selected_result_id == "res_2"
+    table.value = []
+    assert recent.selected_result_id is None
+
+
+def test_table_browser_rebuilds_tables_when_connection_changes(mock_client):
+    pick = MagicMock()
+    pick.value = ""
+    mock_client.list_qualified_table_names.return_value = []
+
+    with patch(
+        "hotdata_marimo.table_browser.resolve_connection_picker",
+        return_value=(pick, None),
+    ):
+        browser = TableBrowser(mock_client)
+
+    browser._sync_table_catalog()
+    assert browser._table_pick_ctx == ""
+
+    pick.value = "conn_1"
+    mock_client.list_qualified_table_names.return_value = ["azure.public.customer"]
+    browser._sync_table_catalog()
+    assert browser._table_pick_ctx == "conn_1"
+    assert browser._all_names == ["azure.public.customer"]
+    assert not browser._empty_catalog
 
 
 def test_workspace_selector_from_env_requires_api_key(monkeypatch: pytest.MonkeyPatch):

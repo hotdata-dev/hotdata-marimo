@@ -7,19 +7,6 @@ import marimo as mo
 from hotdata_runtime import HotdataClient, QueryResult, workspace_health_lines
 
 
-def _option_map_with_unique_labels(
-    pairs: list[tuple[str, str]],
-) -> dict[str, str]:
-    counts: dict[str, int] = {}
-    options: dict[str, str] = {}
-    for label, value in pairs:
-        count = counts.get(label, 0)
-        counts[label] = count + 1
-        key = label if count == 0 else f"{label} ({count + 1})"
-        options[key] = value
-    return options
-
-
 def query_result(
     result: QueryResult,
     *,
@@ -72,32 +59,71 @@ class RecentResults:
     def __init__(self, client: HotdataClient, *, limit: int = 50) -> None:
         self._client = client
         self._results = client.list_recent_results(limit=limit, offset=0)
-        option_pairs = [
-            (f"{r.created_at} · {r.status} · {r.result_id}", r.result_id)
+        self._rows: list[dict[str, object]] = [
+            {
+                "created_at": r.created_at,
+                "status": r.status,
+                "result_id": r.result_id,
+            }
             for r in self._results
         ]
-        options = _option_map_with_unique_labels(option_pairs)
-        self.pick = mo.ui.dropdown(
-            options=options or {"(no results)": ""},
-            label="Recent results",
-            full_width=True,
+        self.table = (
+            mo.ui.table(
+                self._rows,
+                label="Recent results",
+                pagination=True,
+                page_size=min(10, limit),
+                selection="single",
+                max_height=320,
+            )
+            if self._rows
+            else None
         )
 
     @property
     def selected_result_id(self) -> str | None:
-        v = self.pick.value
-        return v if v else None
+        if self.table is None:
+            return None
+        selected = self.table.value
+        if not selected:
+            return None
+        row = selected[0]
+        if not isinstance(row, dict):
+            return None
+        rid = row.get("result_id")
+        return rid if rid else None
 
     @property
     def result(self) -> QueryResult:
         rid = self.selected_result_id
-        mo.stop(rid is None, mo.md("Pick a result id to load."))
+        mo.stop(rid is None, mo.md("Select a result row to load."))
         return self._client.get_result(rid or "")
 
     @property
+    def result_panel(self):
+        rid = self.selected_result_id
+        if rid is None:
+            return mo.md("_Select a result row to load._")
+        return query_result(self._client.get_result(rid), label="Recent result")
+
+    @property
+    def tab_ui(self):
+        if self.table is not None:
+            _ = self.table.value
+        return mo.vstack([self.ui, self.result_panel], gap=2)
+
+    @property
     def ui(self):
-        _ = self.pick.value
-        return mo.vstack([self.pick], gap=1)
+        if self.table is None:
+            return mo.md("_No recent results._")
+        _ = self.table.value
+        return mo.vstack(
+            [
+                mo.md("### Recent results"),
+                self.table,
+            ],
+            gap=1,
+        )
 
 
 def recent_results(client: HotdataClient, *, limit: int = 50) -> RecentResults:
@@ -149,4 +175,35 @@ def connection_status(client: HotdataClient):
     return mo.callout(
         mo.md(f"**API** error — {parts[0]}"),
         kind="danger",
+    )
+
+
+def connections_panel(client: HotdataClient):
+    """Workspace health callout plus a table of configured connections."""
+    status = connection_status(client)
+    conns = client.connections().list_connections().connections
+    if not conns:
+        return mo.vstack([status, mo.md("_No connections in this workspace._")], gap=1)
+    rows: list[dict[str, object]] = []
+    for c in conns:
+        rows.append(
+            {
+                "name": c.name,
+                "id": c.id,
+                "source_type": getattr(c, "source_type", None),
+            }
+        )
+    return mo.vstack(
+        [
+            status,
+            mo.ui.table(
+                rows,
+                label="Connections",
+                pagination=True,
+                page_size=min(10, len(rows)),
+                selection=None,
+                max_height=320,
+            ),
+        ],
+        gap=1,
     )

@@ -35,49 +35,39 @@ def _(hm, mo, os):
 @app.cell
 def _(hm, workspace):
     client = workspace.client
-    status = hm.connection_status(client)
-    browser = hm.table_browser(client)
-    editor = hm.sql_editor(
-        client,
-        default_sql="SELECT 1 AS ok",
-    )
+    status = hm.connections_panel(client)
     recent = hm.recent_results(client, limit=20)
     history = hm.run_history(client, limit=10)
-    return browser, client, editor, history, recent, status, workspace
+    return client, history, recent, status
 
 
 @app.cell
-def _(browser, editor, mo, recent, status, workspace):
-    return mo.vstack(
-        [
-            workspace.ui,
-            status,
-            browser.ui,
-            editor.ui,
-            recent.ui,
-        ],
-        gap=2,
-    )
+def _(mo):
+    mo.md(r"""
+    ## HotData explorer
+    Use the tabs below to switch between workspaces, connection status, recent results, and run history.
+
+    On a shared or networked host, run Marimo **without** `--no-token` and open the printed URL
+    with its access token so only you can use this notebook.
+    """)
+    return
 
 
 @app.cell
-def _(history):
-    return history
+def _(recent):
+    recent_tab = recent.tab_ui
+    return (recent_tab,)
 
 
 @app.cell
-def _(editor, hm):
-    # Explicitly touch nested widget values so Marimo reruns this cell on clicks.
-    _run = editor.run.value
-    _rerun = editor.rerun.value
-    _clear = editor.clear.value
-    return hm.query_result(editor.result), _clear, _rerun, _run
-
-
-@app.cell
-def _(hm, recent):
-    _selected = recent.pick.value
-    return hm.query_result(recent.result, label="Recent result"), _selected
+def _(history, mo, recent_tab, status, workspace):
+    mo.ui.tabs({
+        "Workspaces": workspace.ui,
+        "Connections": status,
+        "Recent results": recent_tab,
+        "Run history": history,
+    })
+    return
 
 
 @app.cell
@@ -86,7 +76,7 @@ def _(client, mo):
         """
         SELECT 1 AS example_value
         """,
-        engine=client,
+        engine=client
     )
     return
 

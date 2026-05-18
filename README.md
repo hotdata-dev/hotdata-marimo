@@ -81,13 +81,15 @@ See `examples/demo.py` for a full runnable notebook flow.
 
 ## Examples
 
-- `examples/demo.py` — end-to-end browser + editor + result rendering flow.
+- `examples/demo.py` — tabbed explorer with workspace selection, connection health, recent results (selectable table), run history, and a native `mo.sql` cell.
 
-Run:
+Run locally (single-user machine):
 
 ```bash
 uv run marimo edit examples/demo.py --no-token
 ```
+
+On a **shared or networked host**, omit `--no-token` and use the access token printed in the terminal URL. Without it, anyone who can reach the Marimo port can run queries against your Hotdata workspace.
 
 ## Layout
 

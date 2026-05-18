@@ -6,39 +6,11 @@ import marimo as mo
 
 from hotdata_runtime import HotdataClient
 
-
-def _connection_options(conns: list[Any]) -> dict[str, str]:
-    counts: dict[str, int] = {}
-    options: dict[str, str] = {}
-    for c in conns:
-        label = c.name
-        count = counts.get(label, 0)
-        counts[label] = count + 1
-        key = label if count == 0 else f"{label} ({c.id})"
-        options[key] = c.id
-    return options
-
-
-def connection_picker(
-    client: HotdataClient,
-    *,
-    label: str = "Connection",
-    full_width: bool = True,
-):
-    listing = client.connections().list_connections()
-    conns = listing.connections
-    if not conns:
-        return mo.ui.dropdown(
-            options={"(no connections)": ""},
-            label=label,
-            full_width=full_width,
-        )
-    options = _connection_options(conns)
-    return mo.ui.dropdown(
-        options=options,
-        label=label,
-        full_width=full_width,
-    )
+from hotdata_marimo._options import (
+    connection_picker,
+    empty_dropdown,
+    resolve_connection_picker,
+)
 
 
 class TableBrowser:
@@ -66,44 +38,42 @@ class TableBrowser:
         self._implicit_connection_id: str | None = None
 
         if self._override_connection_id is None:
-            listing = client.connections().list_connections()
-            conns = listing.connections
-            if len(conns) > 1:
-                self._conn_pick = connection_picker(client)
-            elif len(conns) == 1:
-                self._implicit_connection_id = conns[0].id
-            else:
-                self._implicit_connection_id = ""
+            self._conn_pick, self._implicit_connection_id = resolve_connection_picker(
+                client
+            )
 
         self._table_pick_ctx: str | None = None
+        self._rebuilt_table_pick_this_run = False
+        self._init_table_pick()
 
+    def _init_table_pick(self) -> None:
         if self._conn_pick is not None:
-            self.table_pick = mo.ui.dropdown(
-                options={"(select connection above)": ""},
+            self.table_pick = empty_dropdown(
                 label="Table",
-                full_width=True,
+                message="(select connection above)",
             )
             self._empty_catalog = True
-            self._all_names: list[str] = []
+            self._all_names = []
+            self._table_pick_ctx = ""
+            return
+
+        names = self._names_for_active_connection()
+        self._all_names = names
+        if not names:
+            self.table_pick = empty_dropdown(
+                label="Table",
+                message="(no tables in catalog)",
+            )
+            self._empty_catalog = True
         else:
-            names = self._names_for_active_connection()
-            self._all_names = names
-            if not names:
-                self.table_pick = mo.ui.dropdown(
-                    options={"(no tables in catalog)": ""},
-                    label="Table",
-                    full_width=True,
-                )
-                self._empty_catalog = True
-            else:
-                self._empty_catalog = False
-                self.table_pick = mo.ui.dropdown(
-                    options={n: n for n in names},
-                    label="Table",
-                    full_width=True,
-                    searchable=True,
-                )
-            self._table_pick_ctx = self._active_connection_id()
+            self._empty_catalog = False
+            self.table_pick = mo.ui.dropdown(
+                options={n: n for n in names},
+                label="Table",
+                full_width=True,
+                searchable=True,
+            )
+        self._table_pick_ctx = self._active_connection_id()
 
     def _active_connection_id(self) -> str | None:
         if self._override_connection_id is not None:
@@ -128,10 +98,9 @@ class TableBrowser:
         self._all_names = names
         if not names:
             self._empty_catalog = True
-            self.table_pick = mo.ui.dropdown(
-                options={"(no tables in catalog)": ""},
+            self.table_pick = empty_dropdown(
                 label="Table",
-                full_width=True,
+                message="(no tables in catalog)",
             )
         else:
             self._empty_catalog = False
@@ -153,35 +122,42 @@ class TableBrowser:
         v = self.table_pick.value
         return v if v else None
 
+    def _sync_table_catalog(self) -> None:
+        """Refresh the table dropdown when the active connection changes."""
+        if self._conn_pick is not None:
+            _ = self._conn_pick.value  # type: ignore[attr-defined]
+        cid = self._active_connection_id()
+        if not cid:
+            return
+        if cid == self._table_pick_ctx:
+            return
+        self._rebuild_table_pick(self._names_for_active_connection())
+
     @property
     def ui(self):
         self._rebuilt_table_pick_this_run = False
-
-        if self._conn_pick is not None:
-            _ = self._conn_pick.value
-
-        cid = self._active_connection_id()
-        names = self._names_for_active_connection()
-
-        if cid and cid != self._table_pick_ctx:
-            self._rebuild_table_pick(names)
+        self._sync_table_catalog()
 
         if not self._rebuilt_table_pick_this_run:
             _ = self.table_pick.value
 
         sel = None if self._rebuilt_table_pick_this_run else self.selected_table
+        cid = self._active_connection_id()
         conn_header = (
             mo.md(f"**Connection** `{self._active_connection_id()}`")
             if self._active_connection_id()
             else None
         )
         if not sel:
-            hint = (
-                "_No tables returned from the information schema. "
-                "Try refreshing a connection in Hotdata._"
-                if self._empty_catalog
-                else "Choose a table below (search inside the dropdown when needed)."
-            )
+            if self._conn_pick is not None and not cid:
+                hint = "Choose a connection above to load tables."
+            elif self._empty_catalog:
+                hint = (
+                    "_No tables returned from the information schema. "
+                    "Try refreshing a connection in Hotdata._"
+                )
+            else:
+                hint = "Choose a table below (search inside the dropdown when needed)."
             stack = [
                 mo.md(
                     f"**Workspace** `{self._client.workspace_id}` — {hint}"
