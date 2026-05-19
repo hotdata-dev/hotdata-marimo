@@ -47,6 +47,8 @@ def test_runtime_primitives_are_reexported():
         ("hotdata_table_browser", "table_browser"),
         ("hotdata_query_result", "query_result"),
         ("hotdata_connection_picker", "connection_picker"),
+        ("hotdata_databases_panel", "databases_panel"),
+        ("hotdata_managed_database_writer", "managed_database_writer"),
         ("hotdata_workspace_selector", "workspace_selector_from_env"),
         ("hotdata_recent_results", "recent_results"),
     ],

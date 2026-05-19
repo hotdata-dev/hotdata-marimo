@@ -9,6 +9,11 @@ except PackageNotFoundError:
 
 from hotdata_runtime import HotdataClient, QueryResult, from_env
 
+from hotdata_marimo.databases import (
+    ManagedDatabaseWriter,
+    databases_panel,
+    managed_database_writer,
+)
 from hotdata_marimo.display import (
     RecentResults,
     connection_status,
@@ -31,6 +36,7 @@ __all__ = [
     "HotdataClient",
     "HotdataMarimoEngine",
     "QueryResult",
+    "ManagedDatabaseWriter",
     "RecentResults",
     "SqlEditor",
     "TableBrowser",
@@ -38,13 +44,17 @@ __all__ = [
     "connection_picker",
     "connection_status",
     "connections_panel",
+    "databases_panel",
     "from_env",
     "hotdata_connection_picker",
+    "hotdata_databases_panel",
+    "hotdata_managed_database_writer",
     "hotdata_query_result",
     "hotdata_recent_results",
     "hotdata_sql_editor",
     "hotdata_table_browser",
     "hotdata_workspace_selector",
+    "managed_database_writer",
     "query_result",
     "recent_results",
     "register_hotdata_sql_engine",
@@ -60,6 +70,8 @@ hotdata_sql_editor = sql_editor
 hotdata_table_browser = table_browser
 hotdata_query_result = query_result
 hotdata_connection_picker = connection_picker
+hotdata_databases_panel = databases_panel
+hotdata_managed_database_writer = managed_database_writer
 hotdata_workspace_selector = workspace_selector_from_env
 hotdata_recent_results = recent_results
 
@@ -73,6 +85,8 @@ def register_mo_ui_hotdata_aliases() -> None:
     mo.ui.hotdata_query_result = hotdata_query_result  # type: ignore[attr-defined]
     mo.ui.hotdata_connection_status = connection_status  # type: ignore[attr-defined]
     mo.ui.hotdata_connection_picker = hotdata_connection_picker  # type: ignore[attr-defined]
+    mo.ui.hotdata_databases_panel = hotdata_databases_panel  # type: ignore[attr-defined]
+    mo.ui.hotdata_managed_database_writer = hotdata_managed_database_writer  # type: ignore[attr-defined]
     mo.ui.hotdata_workspace_selector = hotdata_workspace_selector  # type: ignore[attr-defined]
     mo.ui.hotdata_recent_results = hotdata_recent_results  # type: ignore[attr-defined]
 

@@ -32,4 +32,5 @@ def mock_client(sample_result: QueryResult):
     client.connections.return_value.list_connections.return_value = SimpleNamespace(
         connections=[]
     )
+    client.list_managed_databases.return_value = []
     return client
