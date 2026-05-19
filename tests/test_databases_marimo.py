@@ -57,9 +57,15 @@ def test_managed_database_writer_creates_database(mock_client):
     ), patch(
         "hotdata_marimo.databases.empty_dropdown", return_value=database
     ), patch(
+        "hotdata_marimo.databases.mo.ui.dropdown", return_value=database
+    ), patch(
         "hotdata_marimo.databases.mo.ui.file", return_value=file
     ), patch(
         "hotdata_marimo.databases.databases_panel", return_value="list"
+    ), patch(
+        "hotdata_marimo.databases.mo.md", side_effect=lambda x: x
+    ), patch(
+        "hotdata_marimo.databases.mo.callout", side_effect=lambda body, **kw: body
     ):
         writer = ManagedDatabaseWriter(mock_client)
         panel = writer.result_panel
@@ -69,7 +75,7 @@ def test_managed_database_writer_creates_database(mock_client):
         schema="public",
         tables=["orders", "customers"],
     )
-    assert "Created" in str(panel) or panel is not None
+    assert "Created" in str(panel)
 
 
 def test_managed_database_writer_loads_parquet(mock_client):

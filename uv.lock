@@ -151,7 +151,7 @@ name = "exceptiongroup"
 version = "1.3.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
+    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/50/79/66800aadf48771f6b62f7eb014e352e5d06856655206165d775e675a02c9/exceptiongroup-1.3.1.tar.gz", hash = "sha256:8b412432c6055b0b7d14c310000ae93352ed6754f70fa8f7c34141f91c4e3219", size = 30371, upload-time = "2025-11-21T23:01:54.787Z" }
 wheels = [
@@ -200,7 +200,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "hotdata", specifier = ">=0.2.0" },
-    { name = "hotdata-runtime", editable = "../hotdata-runtime" },
+    { name = "hotdata-runtime", specifier = ">=0.1.1" },
     { name = "marimo", specifier = ">=0.10.0" },
 ]
 
@@ -210,23 +210,15 @@ dev = [{ name = "pytest", specifier = ">=8.0" }]
 [[package]]
 name = "hotdata-runtime"
 version = "0.1.1"
-source = { editable = "../hotdata-runtime" }
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "hotdata" },
     { name = "pandas", version = "2.3.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "pandas", version = "3.0.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
 ]
-
-[package.metadata]
-requires-dist = [
-    { name = "hotdata", specifier = ">=0.2.0" },
-    { name = "pandas", specifier = ">=2.0" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "packaging", specifier = ">=23" },
-    { name = "pytest", specifier = ">=8.0" },
+sdist = { url = "https://files.pythonhosted.org/packages/86/0b/b2889774abaa555be7625999c8730361d86f588aec7219918c616817cdb1/hotdata_runtime-0.1.1.tar.gz", hash = "sha256:3ed64b430f258b3505cf2d1f6635069fc1afef6df6fc3fca5e52ac578e69ead7", size = 57795, upload-time = "2026-05-19T05:13:15.451Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/fa/7b/98cf841d7900e4eb198d1a393828a0999d9b4d54ef792cec5fa3eb4c5a01/hotdata_runtime-0.1.1-py3-none-any.whl", hash = "sha256:51da53100329fbf634abbe95073b2edbbdad174886263b40652091a88f41f0ad", size = 10210, upload-time = "2026-05-19T05:13:14.28Z" },
 ]
 
 [[package]]

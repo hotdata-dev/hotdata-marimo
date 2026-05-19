@@ -119,6 +119,7 @@ class ManagedDatabaseWriter:
         )
 
     def _rebuild_database_pick(self) -> None:
+        current = getattr(getattr(self, "database", None), "value", None)
         dbs = self._client.list_managed_databases()
         if not dbs:
             self.database = empty_dropdown(
@@ -126,10 +127,13 @@ class ManagedDatabaseWriter:
                 message="(create one first)",
             )
             return
+        options = {db.name: db.name for db in dbs}
+        value = current if current in options else next(iter(options))
         self.database = mo.ui.dropdown(
-            options={db.name: db.name for db in dbs},
+            options=options,
             label="Database",
             full_width=True,
+            value=value,
         )
 
     def _maybe_create(self) -> None:
