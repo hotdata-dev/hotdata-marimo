@@ -1,37 +1,37 @@
 # hotdata-marimo
 
-Marimo UI helpers for [Hotdata](https://hotdata.dev): run SQL from a notebook, browse catalog metadata, and render results as tables.
+Marimo widgets for [Hotdata](https://hotdata.dev): run SQL, browse catalogs, load managed databases, and display results in notebooks.
 
-## Features
-
-- **Workspace-aware setup** — build a `HotdataClient` from environment variables, or use `workspace_selector_from_env()` to choose a workspace interactively when no workspace is pinned.
-- **Connection health** — show a compact status callout with API, workspace, and optional sandbox context.
-- **Catalog browsing** — browse Hotdata connections, schemas, tables, and columns from Marimo UI controls.
-- **SQL editor widget** — run SQL against Hotdata, cache the latest successful result, and render results in downstream reactive cells.
-- **Native `mo.sql` engine** — register `HotdataMarimoEngine` so Marimo SQL cells can execute through a live `HotdataClient` with `engine=client`.
-- **Result display helpers** — render query results, recent results, and run history as notebook-friendly UI.
-- **Managed databases** — create Hotdata-owned catalogs, declare tables, and load parquet files (replaces dataset uploads for writes).
-- **Marimo UI aliases** — importing `hotdata_marimo` attaches helpers such as `mo.ui.hotdata_sql_editor` and `mo.ui.hotdata_table_browser` for discoverability.
+Requires Python 3.10+, [Marimo](https://marimo.io/), and [hotdata-runtime](https://github.com/hotdata-dev/hotdata-runtime) (installed automatically).
 
 ## Install
 
 ```bash
-uv pip install hotdata-marimo
-# or: pip install hotdata-marimo
+pip install hotdata-marimo
 ```
 
-Requires Python 3.10+, **Marimo**, and [**hotdata-runtime**](https://github.com/hotdata-dev/hotdata-runtime) (Hotdata SDK + runtime/session semantics — pulled in automatically when you `pip install hotdata-marimo`).
+Set `HOTDATA_API_KEY`. Optionally set `HOTDATA_WORKSPACE`, `HOTDATA_API_URL`, or `HOTDATA_SANDBOX`.
 
-## Environment
+## Connect
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `HOTDATA_API_KEY` | Yes | API key for the Hotdata API |
-| `HOTDATA_API_URL` | No | API base URL (default: `https://api.hotdata.dev`) |
-| `HOTDATA_WORKSPACE` | No | Workspace id; if unset, the first active workspace is used |
-| `HOTDATA_SANDBOX` | No | Sandbox session id, passed through to the SDK |
+```python
+import hotdata_marimo as hm
 
-## Minimal notebook
+client = hm.from_env()
+```
+
+If `HOTDATA_WORKSPACE` is unset, pick a workspace interactively:
+
+```python
+ws = hm.workspace_selector_from_env()
+client = ws.client
+```
+
+## SQL editor widget
+
+Run SQL in one cell; show results in the next. Marimo only renders what you **`return`**.
+
+**Cell 1 — editor**
 
 ```python
 import marimo as mo
@@ -42,24 +42,29 @@ editor = hm.sql_editor(client, default_sql="SELECT 1 AS ok")
 return editor.ui
 ```
 
+**Cell 2 — result**
+
 ```python
 return hm.query_result(editor.result)
 ```
 
-Importing `hotdata_marimo` registers discoverability aliases on Marimo’s UI namespace, so you can also use `mo.ui.hotdata_sql_editor`, `mo.ui.hotdata_table_browser`, `mo.ui.hotdata_query_result`, and `mo.ui.hotdata_connection_status`.
+Click **Run on Hotdata** after changing SQL. The editor caches the last successful result so downstream cells do not re-query on every refresh.
 
-Use `hm.connection_status(client)` (or `mo.ui.hotdata_connection_status(client)`) for a small API/workspace health callout.
+## Native Marimo SQL cells
 
-## Marimo SQL Cells
+Register the Hotdata engine once, then pass `engine=client` to `mo.sql`. Hotdata appears as **Hotdata** in the SQL connection picker.
 
-Register the Hotdata SQL engine once during setup, then pass a `HotdataClient` to Marimo SQL cells:
+**Setup cell**
 
 ```python
+import marimo as mo
 import hotdata_marimo as hm
 
 hm.register_hotdata_sql_engine()
 client = hm.from_env()
 ```
+
+**SQL cell**
 
 ```python
 _df = mo.sql(
@@ -70,46 +75,56 @@ _df = mo.sql(
 )
 ```
 
-The engine also exposes Hotdata catalog metadata to Marimo's data-source UI. Hotdata connections are labeled **Hotdata** in the SQL connection picker.
+![Marimo SQL cell with Hotdata selected in the database connections picker](docs/images/mo-sql-hotdata-connection.png)
 
-## Two-cell pattern
+## Browse tables
 
-Keep the editor in one cell and consume `editor.result` in another. The editor caches the last successful run so downstream cells do not re-query the API on every refresh; click **Run on Hotdata** again after you change SQL. While a query is running, a Marimo status spinner is shown.
+```python
+browser = hm.table_browser(client)
+return browser.ui
+```
 
-Marimo only shows **what you `return` from a cell**. Calling `mo.vstack(...)` or `hm.query_result(...)` without returning it produces no visible output.
+Pick a connection, schema, and table to inspect columns. Use `browser.selected_table` in downstream cells.
 
-See `examples/demo.py` for a full runnable notebook flow.
+## Managed databases
 
-## Examples
+Create a Hotdata-owned catalog and load a parquet file from the notebook:
 
-- `examples/demo.py` — tabbed explorer with workspace selection, connection health, managed databases (create + parquet load), recent results (selectable table), run history, and a native `mo.sql` cell.
+```python
+panel = hm.databases_panel(client)
+return panel
+```
 
-Run locally (single-user machine):
+Or use the lower-level writer API:
+
+```python
+writer = hm.managed_database_writer(client)
+return writer.ui
+```
+
+## Other helpers
+
+```python
+return hm.connection_status(client)   # API / workspace callout
+return hm.recent_results(client).ui # past query results
+return hm.run_history(client)       # recent query runs
+```
+
+Importing `hotdata_marimo` also registers `mo.ui.hotdata_*` aliases (e.g. `mo.ui.hotdata_sql_editor`).
+
+## Demo notebook
 
 ```bash
 uv run marimo edit examples/demo.py --no-token
 ```
 
-On a **shared or networked host**, omit `--no-token` and use the access token printed in the terminal URL. Without it, anyone who can reach the Marimo port can run queries against your Hotdata workspace.
-
-## Layout
-
-This repo is intentionally thin: **API client, env helpers, and result models** live in **hotdata-runtime**; **hotdata-marimo** only adds Marimo widgets (`sql_editor`, `table_browser`, `managed_database_writer`, `display` for tables/status/history, `workspace_selector`). Import `HotdataClient` / `QueryResult` / `from_env` from **`hotdata_marimo`** or directly from **`hotdata_runtime`**.
+`examples/demo.py` combines workspace selection, catalog browsing, managed databases, query history, and a native `mo.sql` cell.
 
 ## Development
-
-This package depends on [**hotdata-runtime**](https://github.com/hotdata-dev/hotdata-runtime) (PyPI name `hotdata-runtime`). Development uses **uv**; keep a sibling checkout at `../hotdata-runtime` so the lockfile resolves the runtime from disk (see `[tool.uv.sources]` in `pyproject.toml`).
 
 ```bash
 uv sync --locked
 uv run pytest
-marimo edit examples/demo.py --no-token
 ```
 
-To pin **hotdata-runtime** from Git instead of the sibling path, remove the `[tool.uv.sources]` block, set the dependency line as needed, and run `uv lock` again.
-
-For a **publishable** `uv.lock` (CI that only clones this repo), remove `[tool.uv.sources]`, point `hotdata-runtime` at PyPI or `git+https://…`, then `uv lock`.
-
-The **`[project] name`** in [hotdata-runtime](https://github.com/hotdata-dev/hotdata-runtime) `pyproject.toml` is **`hotdata-runtime`** and the import package is **`hotdata_runtime`**.
-
-Use **`--no-token`** for local development so the editor does not redirect to `/auth/login` (session auth is easy to hit with a global Marimo config). For a public or shared machine, omit it and use the printed URL with an access token instead.
+See [hotdata-runtime](https://github.com/hotdata-dev/hotdata-runtime) for the underlying API client.
