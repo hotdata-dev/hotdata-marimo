@@ -4,6 +4,26 @@ Marimo widgets for [Hotdata](https://hotdata.dev): run SQL, browse catalogs, loa
 
 Requires Python 3.10+, [Marimo](https://marimo.io/), and [hotdata-runtime](https://github.com/hotdata-dev/hotdata-runtime) (installed automatically).
 
+## Supported widgets
+
+Importing `hotdata_marimo` registers `mo.ui.hotdata_*` aliases for discoverability.
+
+| Widget | Function | Notes |
+|--------|----------|-------|
+| SQL editor | `hm.sql_editor(client)` | Returns `.ui` and `.result` |
+| Table browser | `hm.table_browser(client)` | Browse connections, schemas, tables, columns |
+| Managed databases panel | `hm.databases_panel(client)` | Create catalogs and load parquet files |
+| Managed database writer | `hm.managed_database_writer(client)` | Lower-level create/load UI |
+| Workspace selector | `hm.workspace_selector_from_env()` | Pick workspace when `HOTDATA_WORKSPACE` is unset |
+| Connection picker | `hm.connection_picker(client)` | Dropdown of workspace connections |
+| Connection status | `hm.connection_status(client)` | API / workspace health callout |
+| Connections panel | `hm.connections_panel(client)` | Status callout plus connection list |
+| Query result | `hm.query_result(result)` | Render a `QueryResult` as a table |
+| Recent results | `hm.recent_results(client)` | Browse past query results |
+| Run history | `hm.run_history(client)` | Recent query runs |
+
+Each widget also has a `mo.ui.hotdata_*` alias (e.g. `mo.ui.hotdata_sql_editor`). Native Marimo SQL cells are supported via `hm.register_hotdata_sql_engine()` and `mo.sql(..., engine=client)`.
+
 ## Install
 
 ```bash
@@ -104,13 +124,14 @@ return writer.ui
 
 ## Other helpers
 
-```python
-return hm.connection_status(client)   # API / workspace callout
-return hm.recent_results(client).ui # past query results
-return hm.run_history(client)       # recent query runs
-```
+See [Supported widgets](#supported-widgets) for the full list. Quick examples:
 
-Importing `hotdata_marimo` also registers `mo.ui.hotdata_*` aliases (e.g. `mo.ui.hotdata_sql_editor`).
+```python
+return hm.connection_status(client)
+return hm.connections_panel(client)
+return hm.recent_results(client).ui
+return hm.run_history(client)
+```
 
 ## Demo notebook
 
