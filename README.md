@@ -10,6 +10,7 @@ Marimo UI helpers for [Hotdata](https://hotdata.dev): run SQL from a notebook, b
 - **SQL editor widget** — run SQL against Hotdata, cache the latest successful result, and render results in downstream reactive cells.
 - **Native `mo.sql` engine** — register `HotdataMarimoEngine` so Marimo SQL cells can execute through a live `HotdataClient` with `engine=client`.
 - **Result display helpers** — render query results, recent results, and run history as notebook-friendly UI.
+- **Managed databases** — create Hotdata-owned catalogs, declare tables, and load parquet files (replaces dataset uploads for writes).
 - **Marimo UI aliases** — importing `hotdata_marimo` attaches helpers such as `mo.ui.hotdata_sql_editor` and `mo.ui.hotdata_table_browser` for discoverability.
 
 ## Install
@@ -81,7 +82,7 @@ See `examples/demo.py` for a full runnable notebook flow.
 
 ## Examples
 
-- `examples/demo.py` — tabbed explorer with workspace selection, connection health, recent results (selectable table), run history, and a native `mo.sql` cell.
+- `examples/demo.py` — tabbed explorer with workspace selection, connection health, managed databases (create + parquet load), recent results (selectable table), run history, and a native `mo.sql` cell.
 
 Run locally (single-user machine):
 
@@ -93,7 +94,7 @@ On a **shared or networked host**, omit `--no-token` and use the access token pr
 
 ## Layout
 
-This repo is intentionally thin: **API client, env helpers, and result models** live in **hotdata-runtime**; **hotdata-marimo** only adds Marimo widgets (`sql_editor`, `table_browser`, `display` for tables/status/history, `workspace_selector`). Import `HotdataClient` / `QueryResult` / `from_env` from **`hotdata_marimo`** or directly from **`hotdata_runtime`**.
+This repo is intentionally thin: **API client, env helpers, and result models** live in **hotdata-runtime**; **hotdata-marimo** only adds Marimo widgets (`sql_editor`, `table_browser`, `managed_database_writer`, `display` for tables/status/history, `workspace_selector`). Import `HotdataClient` / `QueryResult` / `from_env` from **`hotdata_marimo`** or directly from **`hotdata_runtime`**.
 
 ## Development
 

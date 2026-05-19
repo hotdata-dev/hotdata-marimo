@@ -13,7 +13,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 dependencies = [
-  "hotdata-runtime @ git+https://github.com/hotdata-dev/hotdata-runtime.git",
+  "hotdata-runtime @ git+https://github.com/hotdata-dev/hotdata-runtime.git@feat/managed-databases",
   "marimo>=0.10.0",
 ]
 
