@@ -2,18 +2,15 @@
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[tool.hatch.metadata]
-allow-direct-references = true
-
 [project]
 name = "hotdata-marimo"
-version = "0.1.0"
+version = "0.1.1"
 description = "Marimo integration for Hotdata runtime"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 dependencies = [
-  "hotdata-runtime @ git+https://github.com/hotdata-dev/hotdata-runtime.git@feat/managed-databases",
+  "hotdata-runtime>=0.1.1",
   "marimo>=0.10.0",
 ]
 
@@ -25,8 +22,7 @@ dev = [
 [tool.uv]
 default-groups = ["dev"]
 
-# Resolve hotdata-runtime from a sibling checkout (../hotdata-runtime). Remove this
-# block and re-run `uv lock` before committing a lockfile meant for CI that only clones this repo.
+# Resolve hotdata-runtime from a sibling checkout until v0.1.1 is on PyPI.
 [tool.uv.sources]
 hotdata-runtime = { path = "../hotdata-runtime", editable = true }
 
@@ -39,4 +35,3 @@ testpaths = ["tests"]
 [tool.marimo.runtime]
 # Reduces stale cell state when opening the example; overrides personal marimo.toml if unset.
 auto_instantiate = true
-
