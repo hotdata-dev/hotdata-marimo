@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.23.5"
+__generated_with = "0.23.6"
 app = marimo.App()
 
 
@@ -82,7 +82,7 @@ def _(databases_tab, history, mo, recent_tab, status, workspace):
 @app.cell
 def _(client, mo):
     _df = mo.sql(
-        """
+        f"""
         SELECT 1 AS example_value
         """,
         engine=client
