@@ -20,8 +20,10 @@ class SqlEditor:
         default_sql: str = "",
         label: str = "SQL",
         run_label: str = "Run on Hotdata",
+        database: str | None = None,
     ) -> None:
         self._client = client
+        self._database = database
         self.sql = mo.ui.text_area(default_sql, label=label)
         self.run = mo.ui.button(
             value=0,
@@ -103,7 +105,7 @@ class SqlEditor:
                 title="Running on Hotdata",
                 subtitle="Re-running last query and waiting for results…",
             ):
-                result = self._client.execute_sql(self._cached_sql or "")
+                result = self._client.execute_sql(self._cached_sql or "", database=self._database)
             self._result_cache = result
             self._last_rerun_n = rerun_n
             return result
@@ -113,7 +115,7 @@ class SqlEditor:
                 title="Running on Hotdata",
                 subtitle="Executing query and waiting for results…",
             ):
-                result = self._client.execute_sql(sql_text)
+                result = self._client.execute_sql(sql_text, database=self._database)
             self._result_cache = result
             self._cached_sql = sql_text
             self._last_run_n = run_n
@@ -195,7 +197,8 @@ def sql_editor(
     default_sql: str = "",
     label: str = "SQL",
     run_label: str = "Run on Hotdata",
+    database: str | None = None,
 ) -> SqlEditor:
     return SqlEditor(
-        client, default_sql=default_sql, label=label, run_label=run_label
+        client, default_sql=default_sql, label=label, run_label=run_label, database=database
     )

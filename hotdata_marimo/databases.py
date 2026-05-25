@@ -47,7 +47,7 @@ def databases_panel(client: HotdataClient):
             gap=1,
         )
     rows: list[dict[str, object]] = [
-        {"name": db.name, "id": db.id, "sql_prefix": f"{db.name}.{{schema}}.{{table}}"}
+        {"description": db.description or db.id, "id": db.id, "sql_prefix": f"{db.id}.{{schema}}.{{table}}"}
         for db in dbs
     ]
     return mo.vstack(
@@ -127,8 +127,8 @@ class ManagedDatabaseWriter:
                 message="(create one first)",
             )
             return
-        options = {db.name: db.name for db in dbs}
-        value = current if current in options else next(iter(options))
+        options = {db.description or db.id: db.id for db in dbs}
+        value = current if current in options.values() else next(iter(options.values()))
         self.database = mo.ui.dropdown(
             options=options,
             label="Database",
@@ -153,7 +153,7 @@ class ManagedDatabaseWriter:
         tables = _parse_table_names(self.tables.value)
         try:
             self._create_result = self._client.create_managed_database(
-                db_name,
+                description=db_name,
                 schema=schema,
                 tables=tables or None,
             )
@@ -209,7 +209,7 @@ class ManagedDatabaseWriter:
             db = self._create_result
             return mo.callout(
                 mo.md(
-                    f"Created **{db.name}** (`{db.id}`). "
+                    f"Created **{db.description or db.id}** (`{db.id}`). "
                     "Load parquet into a declared table below."
                 ),
                 kind="success",

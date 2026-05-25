@@ -37,9 +37,12 @@ class HotdataMarimoEngine(SQLConnection[HotdataClient]):
         self,
         connection: HotdataClient,
         engine_name: VariableName | None = None,
+        *,
+        default_database: str | None = None,
     ) -> None:
         super().__init__(connection, engine_name)
         self._connections_cache: list[Any] | None = None
+        self._default_database = default_database
 
     @property
     def source(self) -> str:
@@ -291,7 +294,7 @@ class HotdataMarimoEngine(SQLConnection[HotdataClient]):
         )
 
     def execute(self, query: str) -> Any:
-        qr = self._connection.execute_sql(query)
+        qr = self._connection.execute_sql(query, database=self._default_database)
         fmt = self.sql_output_format()
 
         def to_polars() -> Any:
