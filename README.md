@@ -1,28 +1,6 @@
 # hotdata-marimo
 
-Marimo widgets for [Hotdata](https://hotdata.dev): run SQL, browse catalogs, load managed databases, and display results in notebooks.
-
-Requires Python 3.10+, [Marimo](https://marimo.io/), and [hotdata-runtime](https://github.com/hotdata-dev/hotdata-runtime) (installed automatically).
-
-## Supported widgets
-
-Importing `hotdata_marimo` registers `mo.ui.hotdata_*` aliases for discoverability.
-
-| Widget | Function | Notes |
-|--------|----------|-------|
-| SQL editor | `hm.sql_editor(client)` | Returns `.ui` and `.result` |
-| Table browser | `hm.table_browser(client)` | Browse connections, schemas, tables, columns |
-| Managed databases panel | `hm.databases_panel(client)` | Create catalogs and load parquet files |
-| Managed database writer | `hm.managed_database_writer(client)` | Lower-level create/load UI |
-| Workspace selector | `hm.workspace_selector_from_env()` | Pick workspace when `HOTDATA_WORKSPACE` is unset |
-| Connection picker | `hm.connection_picker(client)` | Dropdown of workspace connections |
-| Connection status | `hm.connection_status(client)` | API / workspace health callout |
-| Connections panel | `hm.connections_panel(client)` | Status callout plus connection list |
-| Query result | `hm.query_result(result)` | Render a `QueryResult` as a table |
-| Recent results | `hm.recent_results(client)` | Browse past query results |
-| Run history | `hm.run_history(client)` | Recent query runs |
-
-Each widget also has a `mo.ui.hotdata_*` alias (e.g. `mo.ui.hotdata_sql_editor`). Native Marimo SQL cells are supported via `hm.register_hotdata_sql_engine()` and `mo.sql(..., engine=client)`.
+[Marimo](https://marimo.io/) widgets for [Hotdata](https://hotdata.dev) — run SQL, browse your schema, and work with managed databases in reactive notebooks.
 
 ## Install
 
@@ -30,31 +8,16 @@ Each widget also has a `mo.ui.hotdata_*` alias (e.g. `mo.ui.hotdata_sql_editor`)
 pip install hotdata-marimo
 ```
 
-Set `HOTDATA_API_KEY`. Optionally set `HOTDATA_WORKSPACE`, `HOTDATA_API_URL`, or `HOTDATA_SANDBOX`.
+## Authentication
 
-## Connect
+Set `HOTDATA_API_KEY` in your environment. Optionally set `HOTDATA_WORKSPACE` to pin a specific workspace (the first available workspace is used if unset).
 
-```python
-import hotdata_marimo as hm
+## Quickstart
 
-client = hm.from_env()
-```
-
-If `HOTDATA_WORKSPACE` is unset, pick a workspace interactively:
+Because Marimo reruns cells reactively, construct a widget in one cell and read its `.ui` or `.result` in the next.
 
 ```python
-ws = hm.workspace_selector_from_env()
-client = ws.client
-```
-
-## SQL editor widget
-
-Run SQL in one cell; show results in the next. Marimo only renders what you **`return`**.
-
-**Cell 1 — editor**
-
-```python
-import marimo as mo
+# Cell 1
 import hotdata_marimo as hm
 
 client = hm.from_env()
@@ -62,21 +25,29 @@ editor = hm.sql_editor(client, default_sql="SELECT 1 AS ok")
 return editor.ui
 ```
 
-**Cell 2 — result**
-
 ```python
+# Cell 2
 return hm.query_result(editor.result)
 ```
 
-Click **Run on Hotdata** after changing SQL. The editor caches the last successful result so downstream cells do not re-query on every refresh.
+Click **Run on Hotdata** after editing SQL. The editor caches the last successful result so downstream cells don't re-query on every refresh.
+
+## Workspace selection
+
+If you have multiple workspaces or `HOTDATA_WORKSPACE` is unset, add an interactive picker. `ws.client` updates when the selection changes:
+
+```python
+ws = hm.workspace_selector_from_env()
+client = ws.client
+return ws.ui
+```
 
 ## Native Marimo SQL cells
 
-Register the Hotdata engine once, then pass `engine=client` to `mo.sql`. Hotdata appears as **Hotdata** in the SQL connection picker.
-
-**Setup cell**
+Register the Hotdata engine once and Hotdata will appear as a selectable engine in the SQL connection picker:
 
 ```python
+# Setup cell
 import marimo as mo
 import hotdata_marimo as hm
 
@@ -84,54 +55,56 @@ hm.register_hotdata_sql_engine()
 client = hm.from_env()
 ```
 
-**SQL cell**
-
 ```python
-_df = mo.sql(
-    """
-    SELECT 1 AS example_value
-    """,
-    engine=client,
-)
+# Any SQL cell
+_df = mo.sql("SELECT * FROM orders LIMIT 10", engine=client)
 ```
 
 ![Marimo SQL cell with Hotdata selected in the database connections picker](docs/images/mo-sql-hotdata-connection.png)
 
-## Browse tables
+## Browse your schema
+
+The table browser lets you pick a connection, search for a table, and inspect its columns — with a starter query ready to copy:
 
 ```python
 browser = hm.table_browser(client)
 return browser.ui
 ```
 
-Pick a connection, schema, and table to inspect columns. Use `browser.selected_table` in downstream cells.
+Use `browser.selected_table` in downstream cells to reference the chosen table.
 
 ## Managed databases
 
-Create a Hotdata-owned catalog and load a parquet file from the notebook:
-
-```python
-panel = hm.databases_panel(client)
-return panel
-```
-
-Or use the lower-level writer API:
+View existing managed databases and load new parquet files from a single tabbed panel:
 
 ```python
 writer = hm.managed_database_writer(client)
-return writer.ui
+return writer.tab_ui
 ```
 
-## Other helpers
-
-See [Supported widgets](#supported-widgets) for the full list. Quick examples:
+Or show just the read-only panel:
 
 ```python
-return hm.connection_status(client)
-return hm.connections_panel(client)
-return hm.recent_results(client).ui
-return hm.run_history(client)
+return hm.databases_panel(client)
 ```
+
+## All widgets
+
+| Widget | Code | What you get |
+|--------|------|-------------|
+| SQL editor | `hm.sql_editor(client)` | `.ui` to show the editor, `.result` to read rows |
+| Query result | `hm.query_result(result)` | Renders a `QueryResult` as a table |
+| Table browser | `hm.table_browser(client)` | Browse connections, tables, and column metadata |
+| Managed databases | `hm.databases_panel(client)` | Read-only list of managed databases |
+| Database writer | `hm.managed_database_writer(client)` | Create databases and load parquet files |
+| Workspace picker | `hm.workspace_selector_from_env()` | Dropdown to switch workspaces |
+| Connection picker | `hm.connection_picker(client)` | Dropdown of connections in the workspace |
+| Connection status | `hm.connection_status(client)` | Health callout for the API and workspace |
+| Connections panel | `hm.connections_panel(client)` | Status + list of connections |
+| Recent results | `hm.recent_results(client)` | Browse past query results |
+| Run history | `hm.run_history(client)` | Recent query runs |
+
+All widgets are also available as `mo.ui.hotdata_*` aliases (e.g. `mo.ui.hotdata_sql_editor`) for discovery via Marimo's autocomplete.
 
 ## Demo notebook
 
@@ -139,7 +112,7 @@ return hm.run_history(client)
 uv run marimo edit examples/demo.py --no-token
 ```
 
-`examples/demo.py` combines workspace selection, catalog browsing, managed databases, query history, and a native `mo.sql` cell.
+The demo combines workspace selection, schema browsing, managed databases, query history, and a native SQL cell in a single tabbed interface.
 
 ## Development
 
@@ -147,5 +120,3 @@ uv run marimo edit examples/demo.py --no-token
 uv sync --locked
 uv run pytest
 ```
-
-See [hotdata-runtime](https://github.com/hotdata-dev/hotdata-runtime) for the underlying API client.
