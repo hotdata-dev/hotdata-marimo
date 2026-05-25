@@ -90,14 +90,13 @@ class RecentResults:
         row = selected[0]
         if not isinstance(row, dict):
             return None
-        rid = row.get("result_id")
-        return rid if rid else None
+        return row.get("result_id") or None
 
     @property
     def result(self) -> QueryResult:
         rid = self.selected_result_id
         mo.stop(rid is None, mo.md("Select a result row to load."))
-        return self._client.get_result(rid or "")
+        return self._client.get_result(rid)
 
     @property
     def result_panel(self):
