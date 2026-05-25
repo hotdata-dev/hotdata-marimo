@@ -17,7 +17,7 @@ def test_databases_panel_empty_state(mock_client):
 
 def test_databases_panel_lists_managed_databases(mock_client):
     mock_client.list_managed_databases.return_value = [
-        ManagedDatabase(id="c1", name="sales", source_type="managed"),
+        ManagedDatabase(id="c1", description="sales", default_connection_id="conn_c1"),
     ]
     with patch("hotdata_marimo.databases.mo.vstack", return_value="panel"), patch(
         "hotdata_marimo.databases.mo.md", side_effect=lambda x: x
@@ -30,8 +30,8 @@ def test_managed_database_writer_creates_database(mock_client):
     mock_client.list_managed_databases.return_value = []
     mock_client.create_managed_database.return_value = ManagedDatabase(
         id="conn_new",
-        name="sales",
-        source_type="managed",
+        description="sales",
+        default_connection_id="conn_c1",
     )
     create = MagicMock()
     create.value = 1
@@ -71,7 +71,7 @@ def test_managed_database_writer_creates_database(mock_client):
         panel = writer.result_panel
 
     mock_client.create_managed_database.assert_called_once_with(
-        "sales",
+        description="sales",
         schema="public",
         tables=["orders", "customers"],
     )
@@ -80,7 +80,7 @@ def test_managed_database_writer_creates_database(mock_client):
 
 def test_managed_database_writer_loads_parquet(mock_client):
     mock_client.list_managed_databases.return_value = [
-        ManagedDatabase(id="c1", name="sales", source_type="managed"),
+        ManagedDatabase(id="c1", description="sales", default_connection_id="conn_c1"),
     ]
     mock_client.upload_parquet.return_value = "upl_1"
     mock_client.load_managed_table.return_value = LoadManagedTableResult(

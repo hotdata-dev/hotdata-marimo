@@ -26,6 +26,8 @@ class WorkspaceSelector:
         self._api_key = api_key
         self._host = host or default_host()
         self._session_id = session_id
+        self._client_cache: HotdataClient | None = None
+        self._client_cache_wid: str | None = None
         selection = resolve_workspace_selection(api_key, self._host, session_id)
         self._explicit = selection.source == "explicit_env"
         if self._explicit:
@@ -64,12 +66,16 @@ class WorkspaceSelector:
 
     @property
     def client(self) -> HotdataClient:
-        return HotdataClient(
-            self._api_key,
-            self.workspace_id,
-            host=self._host,
-            session_id=self._session_id,
-        )
+        wid = self.workspace_id
+        if self._client_cache is None or self._client_cache_wid != wid:
+            self._client_cache = HotdataClient(
+                self._api_key,
+                wid,
+                host=self._host,
+                session_id=self._session_id,
+            )
+            self._client_cache_wid = wid
+        return self._client_cache
 
     @property
     def ui(self):
