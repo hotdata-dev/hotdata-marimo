@@ -62,7 +62,7 @@ class WorkspaceSelector:
         if self._pick is None:
             return self._workspace_id
         v = self._pick.value
-        return v if v else self._workspace_id
+        return v or self._workspace_id
 
     @property
     def client(self) -> HotdataClient:
