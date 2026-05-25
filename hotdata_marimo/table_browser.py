@@ -12,6 +12,8 @@ from hotdata_marimo._options import (
     resolve_connection_picker,
 )
 
+__all__ = ["TableBrowser", "connection_picker", "table_browser"]
+
 
 class TableBrowser:
     """Pick a fully qualified `connection.schema.table` and inspect columns.
@@ -43,58 +45,26 @@ class TableBrowser:
             )
 
         self._table_pick_ctx: str | None = None
-        self._rebuilt_table_pick_this_run = False
         self._init_table_pick()
-
-    def _init_table_pick(self) -> None:
-        if self._conn_pick is not None:
-            self.table_pick = empty_dropdown(
-                label="Table",
-                message="(select connection above)",
-            )
-            self._empty_catalog = True
-            self._all_names = []
-            self._table_pick_ctx = ""
-            return
-
-        names = self._names_for_active_connection()
-        self._all_names = names
-        if not names:
-            self.table_pick = empty_dropdown(
-                label="Table",
-                message="(no tables in catalog)",
-            )
-            self._empty_catalog = True
-        else:
-            self._empty_catalog = False
-            self.table_pick = mo.ui.dropdown(
-                options={n: n for n in names},
-                label="Table",
-                full_width=True,
-                searchable=True,
-            )
-        self._table_pick_ctx = self._active_connection_id()
 
     def _active_connection_id(self) -> str | None:
         if self._override_connection_id is not None:
             return self._override_connection_id or None
         if self._conn_pick is not None:
-            v = self._conn_pick.value  # type: ignore[attr-defined]
-            return v if v else None
-        if self._implicit_connection_id is None:
-            return None
+            return self._conn_pick.value or None  # type: ignore[attr-defined]
         return self._implicit_connection_id or None
 
     def _names_for_active_connection(self) -> list[str]:
         cid = self._active_connection_id()
-        if cid is None or cid == "":
+        if not cid:
             return []
         return self._client.list_qualified_table_names(
             limit=self._table_limit,
             connection_id=cid,
         )
 
-    def _rebuild_table_pick(self, names: list[str]) -> None:
+    def _set_table_pick(self, names: list[str]) -> None:
+        """Create or replace the table dropdown for the given names list."""
         self._all_names = names
         if not names:
             self._empty_catalog = True
@@ -111,7 +81,32 @@ class TableBrowser:
                 searchable=True,
             )
         self._table_pick_ctx = self._active_connection_id()
-        self._rebuilt_table_pick_this_run = True
+
+    def _init_table_pick(self) -> None:
+        if self._conn_pick is not None:
+            self._all_names = []
+            self._empty_catalog = True
+            self.table_pick = empty_dropdown(
+                label="Table",
+                message="(select connection above)",
+            )
+            self._table_pick_ctx = ""
+            return
+        self._set_table_pick(self._names_for_active_connection())
+
+    def _sync_table_catalog(self) -> bool:
+        """Refresh the table dropdown when the active connection changes.
+
+        Returns True if the dropdown was rebuilt (so the caller knows not to
+        read ``.value`` on the new widget in the same Marimo run).
+        """
+        if self._conn_pick is not None:
+            _ = self._conn_pick.value  # type: ignore[attr-defined]
+        cid = self._active_connection_id()
+        if not cid or cid == self._table_pick_ctx:
+            return False
+        self._set_table_pick(self._names_for_active_connection())
+        return True
 
     @property
     def selected_connection_id(self) -> str | None:
@@ -122,30 +117,17 @@ class TableBrowser:
         v = self.table_pick.value
         return v if v else None
 
-    def _sync_table_catalog(self) -> None:
-        """Refresh the table dropdown when the active connection changes."""
-        if self._conn_pick is not None:
-            _ = self._conn_pick.value  # type: ignore[attr-defined]
-        cid = self._active_connection_id()
-        if not cid:
-            return
-        if cid == self._table_pick_ctx:
-            return
-        self._rebuild_table_pick(self._names_for_active_connection())
-
     @property
     def ui(self):
-        self._rebuilt_table_pick_this_run = False
-        self._sync_table_catalog()
-
-        if not self._rebuilt_table_pick_this_run:
+        rebuilt = self._sync_table_catalog()
+        if not rebuilt:
             _ = self.table_pick.value
 
-        sel = None if self._rebuilt_table_pick_this_run else self.selected_table
+        sel = None if rebuilt else self.selected_table
         cid = self._active_connection_id()
         conn_header = (
-            mo.md(f"**Connection** `{self._active_connection_id()}`")
-            if self._active_connection_id()
+            mo.md(f"**Connection** `{cid}`")
+            if cid
             else None
         )
         if not sel:

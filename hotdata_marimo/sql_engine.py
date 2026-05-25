@@ -368,7 +368,11 @@ def register_hotdata_sql_engine() -> None:
 
 def unregister_hotdata_sql_engine() -> None:
     """Remove :class:`HotdataMarimoEngine` from Marimo's registry (mostly for tests)."""
+    global _ORIGINAL_ENGINE_TO_CONNECTION
     from marimo._sql.get_engines import SUPPORTED_ENGINES
 
     while HotdataMarimoEngine in SUPPORTED_ENGINES:
         SUPPORTED_ENGINES.remove(HotdataMarimoEngine)
+    if _ORIGINAL_ENGINE_TO_CONNECTION is not None:
+        _set_engine_to_data_source_connection(_ORIGINAL_ENGINE_TO_CONNECTION)
+        _ORIGINAL_ENGINE_TO_CONNECTION = None
