@@ -105,7 +105,7 @@ class SqlEditor:
                 title="Running on Hotdata",
                 subtitle="Re-running last query and waiting for results…",
             ):
-                result = self._client.execute_sql(self._cached_sql, database=self._database)
+                result = self._client.execute_sql(self._cached_sql or "", database=self._database)
             self._result_cache = result
             self._last_rerun_n = rerun_n
             return result
