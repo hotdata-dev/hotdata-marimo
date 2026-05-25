@@ -128,12 +128,15 @@ class ManagedDatabaseWriter:
             )
             return
         options = {db.description or db.id: db.id for db in dbs}
-        value = current if current in options.values() else next(iter(options.values()))
+        # current holds the previously selected database ID (.value returns the dict value).
+        # mo.ui.dropdown validates value= against option keys (labels), not values.
+        default_key = next(iter(options))
+        selected_key = next((k for k, v in options.items() if v == current), default_key)
         self.database = mo.ui.dropdown(
             options=options,
             label="Database",
             full_width=True,
-            value=value,
+            value=selected_key,
         )
 
     def _maybe_create(self) -> None:
