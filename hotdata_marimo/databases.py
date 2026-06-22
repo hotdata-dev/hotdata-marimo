@@ -6,7 +6,6 @@ import os
 import tempfile
 
 import marimo as mo
-
 from hotdata_runtime import (
     DEFAULT_SCHEMA,
     HotdataClient,
@@ -47,7 +46,11 @@ def databases_panel(client: HotdataClient):
             gap=1,
         )
     rows: list[dict[str, object]] = [
-        {"description": db.description or db.id, "id": db.id, "sql_prefix": f"{db.id}.{{schema}}.{{table}}"}
+        {
+            "description": db.description or db.id,
+            "id": db.id,
+            "sql_prefix": f"{db.id}.{{schema}}.{{table}}",
+        }
         for db in dbs
     ]
     return mo.vstack(

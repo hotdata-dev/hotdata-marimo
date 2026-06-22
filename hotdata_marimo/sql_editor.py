@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import marimo as mo
-
 from hotdata_runtime import HotdataClient, QueryResult
 
 
@@ -182,13 +181,13 @@ class SqlEditor:
             )
 
         result = self._execute_or_cached()
-        if result is not None:
-            return result
-
-        mo.stop(
-            True,
-            mo.md("SQL changed — click **Run on Hotdata** again to execute."),
-        )
+        if result is None:
+            mo.stop(
+                True,
+                mo.md("SQL changed — click **Run on Hotdata** again to execute."),
+            )
+            raise AssertionError("unreachable")
+        return result
 
 
 def sql_editor(

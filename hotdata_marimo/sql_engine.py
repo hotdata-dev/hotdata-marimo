@@ -6,7 +6,6 @@ from collections import defaultdict
 from typing import Any, Literal
 
 from hotdata_runtime import HotdataClient
-
 from marimo import _loggers
 from marimo._data.models import (
     Database,
@@ -50,7 +49,8 @@ class HotdataMarimoEngine(SQLConnection[HotdataClient]):
 
     @property
     def dialect(self) -> str:
-        # Marimo labels engines as ``{dialect} ({variable_name})``; display_name is patched to "Hotdata".
+        # Marimo labels engines as ``{dialect} ({variable_name})``;
+        # display_name is patched to "Hotdata".
         return "hotdata"
 
     @staticmethod

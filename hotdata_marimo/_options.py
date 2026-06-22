@@ -6,7 +6,6 @@ from collections.abc import Callable
 from typing import Any
 
 import marimo as mo
-
 from hotdata_runtime import HotdataClient
 
 
