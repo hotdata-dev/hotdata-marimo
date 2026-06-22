@@ -4,15 +4,14 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 import pytest
+from marimo._types.ids import VariableName
 
 import hotdata_marimo as hm
-from hotdata_runtime import HotdataClient
 from hotdata_marimo._options import connection_options, unique_label_options
 from hotdata_marimo.display import connections_panel
 from hotdata_marimo.sql_engine import HotdataMarimoEngine
 from hotdata_marimo.table_browser import TableBrowser
 from hotdata_marimo.workspace_selector import WorkspaceSelector, workspace_selector_from_env
-from marimo._types.ids import VariableName
 
 
 def _selection(*, workspace_id: str, source: str, workspaces: list | None = None):
@@ -195,8 +194,8 @@ def test_hotdata_engine_display_name_in_marimo_ui(mock_client) -> None:
     hm.register_hotdata_sql_engine()
     try:
         engine = HotdataMarimoEngine(mock_client, engine_name=VariableName("client"))
-        import marimo._sql.get_engines as ge
         import marimo._runtime.runner.hooks_post_execution as hpe
+        import marimo._sql.get_engines as ge
 
         for module in (ge, hpe):
             conn = module.engine_to_data_source_connection(VariableName("client"), engine)

@@ -3,9 +3,9 @@ from __future__ import annotations
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
-import hotdata_marimo as hm
-from hotdata_marimo.databases import ManagedDatabaseWriter, databases_panel
 from hotdata_runtime import LoadManagedTableResult, ManagedDatabase
+
+from hotdata_marimo.databases import ManagedDatabaseWriter, databases_panel
 
 
 def test_databases_panel_empty_state(mock_client):

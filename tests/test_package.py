@@ -2,13 +2,12 @@ from __future__ import annotations
 
 import importlib
 import re
+from importlib.metadata import version as dist_version
 from pathlib import Path
 
 import pytest
-from importlib.metadata import version as dist_version
 
 import hotdata_marimo as hm
-
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SOURCE_ROOT = REPO_ROOT / "hotdata_marimo"
