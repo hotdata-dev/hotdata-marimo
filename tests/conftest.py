@@ -4,7 +4,7 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
-from hotdata_runtime import QueryResult
+from hotdata_framework import QueryResult
 
 
 @pytest.fixture

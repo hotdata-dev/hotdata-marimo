@@ -6,7 +6,7 @@ import os
 import tempfile
 
 import marimo as mo
-from hotdata_runtime import (
+from hotdata_framework import (
     DEFAULT_SCHEMA,
     HotdataClient,
     LoadManagedTableResult,

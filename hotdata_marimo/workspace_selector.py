@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import marimo as mo
-from hotdata_runtime import (
+from hotdata_framework import (
     HotdataClient,
     default_api_key,
     default_host,

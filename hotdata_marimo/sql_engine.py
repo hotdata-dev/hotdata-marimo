@@ -1,11 +1,11 @@
-"""Marimo ``mo.sql`` engine integration for :class:`~hotdata_runtime.HotdataClient`."""
+"""Marimo ``mo.sql`` engine integration for :class:`~hotdata_framework.HotdataClient`."""
 
 from __future__ import annotations
 
 from collections import defaultdict
 from typing import Any, Literal
 
-from hotdata_runtime import HotdataClient
+from hotdata_framework import HotdataClient
 from marimo import _loggers
 from marimo._data.models import (
     Database,
@@ -29,7 +29,7 @@ class HotdataMarimoEngine(SQLConnection[HotdataClient]):
     """Marimo :class:`~marimo._sql.engines.types.SQLConnection` backed by Hotdata.
 
     Catalog methods support Marimo's Data Sources panel. ``execute()`` only runs SQL
-    via :meth:`~hotdata_runtime.HotdataClient.execute_sql` (no catalog calls in that path).
+    via :meth:`~hotdata_framework.HotdataClient.execute_sql` (no catalog calls in that path).
     """
 
     def __init__(

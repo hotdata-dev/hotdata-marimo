@@ -3,7 +3,7 @@ from __future__ import annotations
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
-from hotdata_runtime import LoadManagedTableResult, ManagedDatabase
+from hotdata_framework import LoadManagedTableResult, ManagedDatabase
 
 from hotdata_marimo.databases import ManagedDatabaseWriter, databases_panel
 

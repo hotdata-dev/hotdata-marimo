@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 import marimo as mo
-from hotdata_runtime import HotdataClient
+from hotdata_framework import HotdataClient
 
 from hotdata_marimo._options import (
     connection_picker,
