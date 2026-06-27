@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import marimo as mo
-from hotdata_runtime import HotdataClient, QueryResult
+from hotdata_framework import HotdataClient, QueryResult
 
 
 class SqlEditor:

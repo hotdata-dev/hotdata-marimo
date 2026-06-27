@@ -6,7 +6,7 @@ from collections.abc import Callable
 from typing import Any
 
 import marimo as mo
-from hotdata_runtime import HotdataClient
+from hotdata_framework import HotdataClient
 
 
 def unique_label_options(

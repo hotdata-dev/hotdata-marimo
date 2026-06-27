@@ -1,4 +1,4 @@
-"""Marimo-native UI and helpers for Hotdata (built on hotdata-runtime)."""
+"""Marimo-native UI and helpers for Hotdata (built on hotdata-framework)."""
 
 from importlib.metadata import PackageNotFoundError, version
 
@@ -7,7 +7,7 @@ try:
 except PackageNotFoundError:
     __version__ = "0.0.0+unknown"
 
-from hotdata_runtime import HotdataClient, QueryResult, from_env
+from hotdata_framework import HotdataClient, QueryResult, from_env
 
 from hotdata_marimo.databases import (
     ManagedDatabaseWriter,

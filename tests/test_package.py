@@ -12,8 +12,8 @@ import hotdata_marimo as hm
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SOURCE_ROOT = REPO_ROOT / "hotdata_marimo"
 _RUNTIME_SUBMODULE = re.compile(
-    r"(?m)^\s*(?:from\s+hotdata_runtime\.(client|env|result|health)\s+import"
-    r"|import\s+hotdata_runtime\.(client|env|result|health)(?:\s|$|,|as))"
+    r"(?m)^\s*(?:from\s+hotdata_framework\.(client|env|result|health)\s+import"
+    r"|import\s+hotdata_framework\.(client|env|result|health)(?:\s|$|,|as))"
 )
 
 
@@ -32,7 +32,7 @@ def test_public_export_is_importable(name: str):
 
 
 def test_runtime_primitives_are_reexported():
-    from hotdata_runtime import HotdataClient, QueryResult, from_env
+    from hotdata_framework import HotdataClient, QueryResult, from_env
 
     assert hm.HotdataClient is HotdataClient
     assert hm.QueryResult is QueryResult
@@ -56,13 +56,13 @@ def test_mo_ui_aliases_match_public_helpers(alias: str, target: str):
     assert getattr(hm, alias) is getattr(hm, target)
 
 
-def test_source_uses_hotdata_runtime_root_imports():
+def test_source_uses_hotdata_framework_root_imports():
     violations: list[str] = []
     for path in SOURCE_ROOT.rglob("*.py"):
         if _RUNTIME_SUBMODULE.search(path.read_text(encoding="utf-8")):
             violations.append(str(path.relative_to(REPO_ROOT)))
     assert not violations, (
-        "Use `from hotdata_runtime import ...` in package source; "
+        "Use `from hotdata_framework import ...` in package source; "
         f"found submodule imports in: {', '.join(violations)}"
     )
 

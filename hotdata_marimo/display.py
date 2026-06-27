@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import marimo as mo
-from hotdata_runtime import HotdataClient, QueryResult, workspace_health_lines
+from hotdata_framework import HotdataClient, QueryResult, workspace_health_lines
 
 
 def query_result(
