@@ -26,7 +26,6 @@ def mock_client(sample_result: QueryResult):
     client = MagicMock()
     client.workspace_id = "ws_test"
     client.host = "https://api.hotdata.dev"
-    client.session_id = "sb_1"
     client.execute_sql = MagicMock(return_value=sample_result)
     client.connections.return_value.list_connections.return_value = SimpleNamespace(
         connections=[]

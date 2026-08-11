@@ -5,7 +5,6 @@ from hotdata_framework import (
     HotdataClient,
     default_api_key,
     default_host,
-    default_session_id,
     resolve_workspace_selection,
 )
 
@@ -20,15 +19,13 @@ class WorkspaceSelector:
         *,
         api_key: str,
         host: str | None = None,
-        session_id: str | None = None,
         label: str = "Workspace",
     ) -> None:
         self._api_key = api_key
         self._host = host or default_host()
-        self._session_id = session_id
         self._client_cache: HotdataClient | None = None
         self._client_cache_wid: str | None = None
-        selection = resolve_workspace_selection(api_key, self._host, session_id)
+        selection = resolve_workspace_selection(api_key, self._host)
         self._explicit = selection.source == "explicit_env"
         if self._explicit:
             self._pick = None
@@ -72,7 +69,6 @@ class WorkspaceSelector:
                 self._api_key,
                 wid,
                 host=self._host,
-                session_id=self._session_id,
             )
             self._client_cache_wid = wid
         return self._client_cache
@@ -90,10 +86,8 @@ def workspace_selector_from_env(*, label: str = "Workspace") -> WorkspaceSelecto
     if not api_key:
         raise RuntimeError("HOTDATA_API_KEY must be set.")
     host = default_host()
-    session = default_session_id()
     return WorkspaceSelector(
         api_key=api_key,
         host=host,
-        session_id=session,
         label=label,
     )
