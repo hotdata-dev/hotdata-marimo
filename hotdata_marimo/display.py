@@ -166,7 +166,7 @@ def run_history(
 
 
 def connection_status(client: HotdataClient):
-    """Small status line: API reachability, workspace id, connection count, sandbox."""
+    """Small status line: API reachability, workspace id, connection count."""
     ok, parts = workspace_health_lines(client)
     if ok:
         return mo.callout(mo.md(" · ".join(parts)), kind="success")

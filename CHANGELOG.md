@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- **Breaking:** session/sandbox support is gone. `WorkspaceSelector` no longer
+  accepts `session_id=`, and `workspace_selector_from_env()` no longer reads
+  `HOTDATA_SANDBOX`.
+
+  This follows `hotdata-framework` 0.11.0, which removed the concept: the value
+  had already stopped reaching anything server-side, and the underlying SDK
+  dropped the `SessionId` security scheme, so passing it raises rather than being
+  ignored. `import hotdata_marimo` would have failed outright on that release,
+  because this package imported `default_session_id` from the framework.
+
+  Drop `session_id=` from `WorkspaceSelector(...)` and stop setting
+  `HOTDATA_SANDBOX`; nothing else changes.
+
 
 
 
