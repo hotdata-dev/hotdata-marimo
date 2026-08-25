@@ -31,13 +31,13 @@ def _upload_parquet_bytes(client: HotdataClient, contents: bytes) -> str:
 
 
 def databases_panel(client: HotdataClient):
-    """Table of managed databases in the workspace."""
+    """Table of instant databases in the workspace."""
     dbs = client.list_managed_databases()
     if not dbs:
         return mo.vstack(
             [
-                mo.md("### Managed databases"),
-                mo.md("_No managed databases yet._"),
+                mo.md("### Instant databases"),
+                mo.md("_No instant databases yet._"),
                 mo.md(
                     "Create one below, or with the CLI: "
                     "`hotdata databases create --name <name> --table <table>`."
@@ -55,10 +55,10 @@ def databases_panel(client: HotdataClient):
     ]
     return mo.vstack(
         [
-            mo.md("### Managed databases"),
+            mo.md("### Instant databases"),
             mo.ui.table(
                 rows,
-                label="Managed databases",
+                label="Instant databases",
                 pagination=True,
                 page_size=min(10, len(rows)),
                 selection=None,
@@ -71,7 +71,7 @@ def databases_panel(client: HotdataClient):
 
 
 class ManagedDatabaseWriter:
-    """Create managed databases and load parquet files into declared tables.
+    """Create instant databases and load parquet files into declared tables.
 
     Instantiate in one cell and use ``.tab_ui`` in another (see package README).
     """
