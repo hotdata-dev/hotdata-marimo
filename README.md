@@ -1,6 +1,6 @@
 # hotdata-marimo
 
-[Marimo](https://marimo.io/) widgets for [Hotdata](https://hotdata.dev) — run SQL, browse your schema, and work with managed databases in reactive notebooks.
+[Marimo](https://marimo.io/) widgets for [Hotdata](https://hotdata.dev) — run SQL, browse your schema, and work with instant databases in reactive notebooks.
 
 ## Install
 
@@ -73,9 +73,9 @@ return browser.ui
 
 Use `browser.selected_table` in downstream cells to reference the chosen table.
 
-## Managed databases
+## Instant databases
 
-View existing managed databases and load new parquet files from a single tabbed panel:
+View existing instant databases and load new parquet files from a single tabbed panel:
 
 ```python
 writer = hm.managed_database_writer(client)
@@ -95,7 +95,7 @@ return hm.databases_panel(client)
 | SQL editor | `hm.sql_editor(client)` | `.ui` to show the editor, `.result` to read rows |
 | Query result | `hm.query_result(result)` | Renders a `QueryResult` as a table |
 | Table browser | `hm.table_browser(client)` | Browse connections, tables, and column metadata |
-| Managed databases | `hm.databases_panel(client)` | Read-only list of managed databases |
+| Instant databases | `hm.databases_panel(client)` | Read-only list of instant databases |
 | Database writer | `hm.managed_database_writer(client)` | Create databases and load parquet files |
 | Workspace picker | `hm.workspace_selector_from_env()` | Dropdown to switch workspaces |
 | Connection picker | `hm.connection_picker(client)` | Dropdown of connections in the workspace |
@@ -112,7 +112,7 @@ All widgets are also available as `mo.ui.hotdata_*` aliases (e.g. `mo.ui.hotdata
 uv run marimo edit examples/demo.py --no-token
 ```
 
-The demo combines workspace selection, schema browsing, managed databases, query history, and a native SQL cell in a single tabbed interface.
+The demo combines workspace selection, schema browsing, instant databases, query history, and a native SQL cell in a single tabbed interface.
 
 ## Development
 

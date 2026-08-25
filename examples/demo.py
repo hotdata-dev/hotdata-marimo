@@ -46,7 +46,7 @@ def _(hm, workspace):
 def _(mo):
     mo.md(r"""
     ## HotData explorer
-    Use the tabs below to switch between workspaces, connections, managed databases,
+    Use the tabs below to switch between workspaces, connections, instant databases,
     recent results, and run history.
 
     On a shared or networked host, run Marimo **without** `--no-token` and open the printed URL
