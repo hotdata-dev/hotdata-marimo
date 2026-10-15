@@ -4,13 +4,13 @@ build-backend = "hatchling.build"
 
 [project]
 name = "hotdata-marimo"
-version = "0.1.4"
+version = "0.2.0"
 description = "Marimo integration for Hotdata runtime"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 dependencies = [
-  "hotdata-framework>=0.2.3",
+  "hotdata-framework>=0.5.0",
   "hotdata>=0.4.1",
   "marimo>=0.10.0",
 ]
